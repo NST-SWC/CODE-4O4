@@ -14,15 +14,32 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+    
+    console.log("📝 Creating pending member request:", payload.email);
+    
     const db = getDb();
-    await db.collection("joinRequests").add({
-      ...payload,
+    
+    // Add to pendingMembers collection
+    await db.collection("pendingMembers").add({
+      name: payload.displayName,
+      email: payload.email,
+      phone: payload.phone,
+      github: payload.github || null,
+      portfolio: payload.portfolio || null,
+      interests: payload.interests || [],
+      experience: payload.experience || "beginner",
+      goals: payload.goals || "",
+      role: payload.role || "student",
+      availability: payload.availability || "",
       createdAt: serverTimestamp(),
       status: "pending",
     });
+    
+    console.log("✅ Added to pendingMembers collection");
+    
     return NextResponse.json({ ok: true, message: "Request received." });
   } catch (error) {
-    console.error("join request error", error);
+    console.error("❌ Join request error:", error);
     return NextResponse.json(
       {
         ok: false,

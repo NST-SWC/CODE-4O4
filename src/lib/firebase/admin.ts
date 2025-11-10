@@ -2,33 +2,41 @@ import { cert, getApps, initializeApp, type App } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import type { ServiceAccount } from "firebase-admin";
 
-import serviceAccountJson from "../../../nst-swc1-firebase-adminsdk-fbsvc-79850ecef3.json";
-
 let adminApp: App | null = null;
 
 const getServiceAccount = (): ServiceAccount | null => {
+  // First, try to get service account from environment variable (JSON string)
   if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     try {
-      return JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT) as ServiceAccount;
+      const parsed = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      console.log("Using FIREBASE_SERVICE_ACCOUNT from environment");
+      return {
+        projectId: parsed.project_id,
+        privateKey: parsed.private_key,
+        clientEmail: parsed.client_email,
+      } as ServiceAccount;
     } catch (error) {
-      console.warn("Failed to parse FIREBASE_SERVICE_ACCOUNT env", error);
+      console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT:", error);
     }
   }
-  // Convert the imported JSON (with snake_case) to ServiceAccount format (camelCase)
-  const json = serviceAccountJson as ServiceAccount & {
-    project_id: string;
-    private_key: string;
-    client_email: string;
-  };
-  if (!json || !json.project_id) {
-    console.error("Service account JSON is invalid or missing");
-    return null;
+  
+  // Fallback: construct from individual environment variables
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+  
+  if (projectId && clientEmail && privateKey) {
+    console.log("Using individual Firebase environment variables");
+    return {
+      projectId,
+      clientEmail,
+      privateKey: privateKey.replace(/\\n/g, '\n'), // Handle escaped newlines
+    } as ServiceAccount;
   }
-  return {
-    projectId: json.project_id,
-    privateKey: json.private_key,
-    clientEmail: json.client_email,
-  } as ServiceAccount;
+  
+  console.error("❌ No Firebase credentials found in environment variables");
+  console.error("Please set FIREBASE_SERVICE_ACCOUNT or individual variables");
+  return null;
 };
 
 export const getAdminApp = () => {

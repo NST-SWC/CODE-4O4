@@ -2,11 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { adminQueue } from "@/lib/data";
-import RequestCard from "@/components/admin/request-card";
 import { PageContainer } from "@/components/shared/page-container";
 import { PageIntro } from "@/components/shared/page-intro";
-import { CheckCircle, Users } from "lucide-react";
+import { CheckCircle, Users, X } from "lucide-react";
 
 type ProjectInterest = {
   id: string;
@@ -19,9 +17,53 @@ type ProjectInterest = {
   userEmail?: string;
 };
 
+type PendingMember = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  github?: string;
+  portfolio?: string;
+  interests: string[];
+  experience: string;
+  goals: string;
+  role: string;
+  availability: string;
+  createdAt?: any;
+  status: string;
+};
+
 const AdminPage = () => {
   const [projectInterests, setProjectInterests] = useState<ProjectInterest[]>([]);
+  const [pendingMembers, setPendingMembers] = useState<PendingMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"members" | "projects">("members");
+
+  // Fetch pending members
+  useEffect(() => {
+    const fetchPendingMembers = async () => {
+      try {
+        console.log("🔄 Fetching pending members...");
+        const response = await fetch("/api/pending-members");
+        const result = await response.json();
+        
+        if (result.ok && result.data) {
+          console.log("✅ Fetched pending members:", result.data);
+          setPendingMembers(result.data);
+        } else {
+          console.warn("⚠️  Failed to fetch pending members:", result.message);
+        }
+      } catch (error) {
+        console.error("❌ Error fetching pending members:", error);
+      }
+    };
+
+    fetchPendingMembers();
+    
+    // Refresh every 5 seconds
+    const interval = setInterval(fetchPendingMembers, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Fetch project interests from Firestore
   useEffect(() => {
@@ -50,6 +92,62 @@ const AdminPage = () => {
     const interval = setInterval(fetchInterests, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleApproveMember = async (memberId: string) => {
+    if (!confirm("Approve this member to join the club?")) return;
+    
+    try {
+      const response = await fetch("/api/pending-members", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          memberId,
+          decision: "approved",
+          adminId: "admin-1", // TODO: Get from auth context
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (result.ok) {
+        alert("✅ Member approved and added to club!");
+        setPendingMembers((prev) => prev.filter((m) => m.id !== memberId));
+      } else {
+        alert(`Failed: ${result.message}`);
+      }
+    } catch (error) {
+      console.error("❌ Error:", error);
+      alert("Failed to approve member");
+    }
+  };
+
+  const handleRejectMember = async (memberId: string) => {
+    if (!confirm("Reject this membership request?")) return;
+    
+    try {
+      const response = await fetch("/api/pending-members", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          memberId,
+          decision: "rejected",
+          adminId: "admin-1", // TODO: Get from auth context
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (result.ok) {
+        alert("❌ Member request rejected");
+        setPendingMembers((prev) => prev.filter((m) => m.id !== memberId));
+      } else {
+        alert(`Failed: ${result.message}`);
+      }
+    } catch (error) {
+      console.error("❌ Error:", error);
+      alert("Failed to reject member");
+    }
+  };
 
   const handleApprove = async (interestId: string, projectId: string, userId: string) => {
     try {
@@ -99,25 +197,128 @@ const AdminPage = () => {
       }
     />
 
-    {/* Project Interest Requests Section */}
-    <div className="mt-10">
-      <div className="mb-6 flex items-center gap-3">
-        <Users className="h-5 w-5 text-emerald-400" />
-        <h2 className="text-xl font-semibold text-white">
-          Project Join Requests
-        </h2>
-        <span className="rounded-full bg-emerald-400/10 px-3 py-1 text-xs text-emerald-400">
-          {loading ? "..." : `${projectInterests.length} pending`}
-        </span>
-      </div>
+    {/* Tab Navigation */}
+    <div className="mt-8 flex gap-4 border-b border-white/10">
+      <button
+        onClick={() => setActiveTab("members")}
+        className={`px-6 py-3 text-sm font-medium transition ${
+          activeTab === "members"
+            ? "border-b-2 border-emerald-400 text-emerald-400"
+            : "text-white/60 hover:text-white"
+        }`}
+      >
+        Club Member Requests ({pendingMembers.length})
+      </button>
+      <button
+        onClick={() => setActiveTab("projects")}
+        className={`px-6 py-3 text-sm font-medium transition ${
+          activeTab === "projects"
+            ? "border-b-2 border-emerald-400 text-emerald-400"
+            : "text-white/60 hover:text-white"
+        }`}
+      >
+        Project Join Requests ({projectInterests.length})
+      </button>
+    </div>
 
-      {loading ? (
-        <div className="rounded-3xl border border-white/10 bg-black/40 p-8 text-center text-sm text-white/60">
-          Loading requests...
-        </div>
-      ) : projectInterests.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          {projectInterests.map((request) => (
+    {/* Club Member Requests */}
+    {activeTab === "members" && (
+      <div className="mt-8">
+        {loading ? (
+          <div className="rounded-3xl border border-white/10 bg-black/40 p-8 text-center text-sm text-white/60">
+            Loading requests...
+          </div>
+        ) : pendingMembers.length > 0 ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            {pendingMembers.map((member) => (
+              <div
+                key={member.id}
+                className="rounded-3xl border border-white/10 bg-black/40 p-6"
+              >
+                <div className="mb-4">
+                  <p className="text-sm uppercase tracking-[0.3em] text-sky-400">
+                    {member.role || "Student"} • {member.experience || "Beginner"}
+                  </p>
+                  <h3 className="mt-2 text-xl font-semibold text-white">
+                    {member.name}
+                  </h3>
+                  <p className="text-sm text-white/60">{member.email}</p>
+                  <p className="text-sm text-white/60">{member.phone}</p>
+                </div>
+
+                {member.interests && member.interests.length > 0 && (
+                  <div className="mb-4">
+                    <p className="text-xs text-white/50 mb-2">Interests:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {member.interests.map((interest, idx) => (
+                        <span
+                          key={idx}
+                          className="rounded-full bg-emerald-400/10 px-3 py-1 text-xs text-emerald-400"
+                        >
+                          {interest}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {member.goals && (
+                  <div className="mb-4">
+                    <p className="text-xs text-white/50 mb-1">Goals:</p>
+                    <p className="text-sm text-white/70">{member.goals}</p>
+                  </div>
+                )}
+
+                <div className="mb-4 flex items-center gap-2 text-xs text-white/50">
+                  <span>
+                    Requested{" "}
+                    {member.createdAt
+                      ? new Date(
+                          member.createdAt.toDate
+                            ? member.createdAt.toDate()
+                            : member.createdAt
+                        ).toLocaleDateString()
+                      : "recently"}
+                  </span>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    className="flex-1 rounded-full bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-400 transition hover:bg-emerald-400/20"
+                    onClick={() => handleApproveMember(member.id)}
+                  >
+                    <CheckCircle className="inline h-4 w-4 mr-1" />
+                    Approve & Add to Club
+                  </button>
+                  <button
+                    className="flex-1 rounded-full border border-red-500/30 px-4 py-2 text-sm text-red-400 transition hover:bg-red-500/10"
+                    onClick={() => handleRejectMember(member.id)}
+                  >
+                    <X className="inline h-4 w-4 mr-1" />
+                    Reject
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-3xl border border-dashed border-white/20 p-8 text-center text-sm text-white/60">
+            No pending club membership requests
+          </div>
+        )}
+      </div>
+    )}
+
+    {/* Project Join Requests */}
+    {activeTab === "projects" && (
+      <div className="mt-8">
+        {loading ? (
+          <div className="rounded-3xl border border-white/10 bg-black/40 p-8 text-center text-sm text-white/60">
+            Loading requests...
+          </div>
+        ) : projectInterests.length > 0 ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            {projectInterests.map((request) => (
               <div
                 key={request.id}
                 className="rounded-3xl border border-white/10 bg-black/40 p-6"
@@ -164,40 +365,14 @@ const AdminPage = () => {
                 </div>
               </div>
             ))}
-        </div>
-      ) : (
-        <div className="rounded-3xl border border-dashed border-white/20 p-8 text-center text-sm text-white/60">
-          No pending project join requests
-        </div>
-      )}
-    </div>
-
-    {/* Club Membership Requests Section */}
-    <div className="mt-12">
-      <div className="mb-6 flex items-center gap-3">
-        <CheckCircle className="h-5 w-5 text-sky-400" />
-        <h2 className="text-xl font-semibold text-white">
-          Club Membership Requests
-        </h2>
-        <span className="rounded-full bg-sky-400/10 px-3 py-1 text-xs text-sky-400">
-          {adminQueue.length} pending
-        </span>
+          </div>
+        ) : (
+          <div className="rounded-3xl border border-dashed border-white/20 p-8 text-center text-sm text-white/60">
+            No pending project join requests
+          </div>
+        )}
       </div>
-
-      {adminQueue.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2">
-          {adminQueue.map((request) => (
-            <div key={request.id}>
-              <RequestCard request={request} />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="rounded-3xl border border-dashed border-white/20 p-8 text-center text-sm text-white/60">
-          No pending membership requests
-        </div>
-      )}
-    </div>
+    )}
 
     <div className="mt-8 rounded-3xl border border-dashed border-white/20 p-5 text-sm text-white/70">
       💡 <strong>Demo Mode:</strong> Approvals are logged but not persisted to database.

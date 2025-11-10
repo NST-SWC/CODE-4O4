@@ -107,11 +107,13 @@ export async function PATCH(request: Request) {
       status?: "approved" | "rejected" | "pending";
       projectId?: string;
       userId?: string;
+      deleteAfter?: boolean; // Option to delete after status update
+      ownerId?: string; // ID of the person approving (project owner)
     };
     
     console.log("📝 Updating project interest:", body);
     
-    const { interestId, status } = body;
+    const { interestId, status, deleteAfter = false } = body;
     
     if (!interestId || !status) {
       return NextResponse.json(
@@ -123,28 +125,73 @@ export async function PATCH(request: Request) {
     try {
       const db = getDb();
       
-      await db.collection("projectInterests").doc(interestId).update({
-        status,
-        updatedAt: serverTimestamp(),
-        decidedAt: status !== "pending" ? serverTimestamp() : null,
+      // Get the project interest data before deleting
+      const interestDoc = await db.collection("projectInterests").doc(interestId).get();
+      
+      if (!interestDoc.exists) {
+        return NextResponse.json(
+          { ok: false, message: "Project interest not found" },
+          { status: 404 },
+        );
+      }
+      
+      const interestData = interestDoc.data();
+      const projectId = body.projectId || interestData?.projectId;
+      const userId = body.userId || interestData?.userId;
+      
+      // If approved, add to projectMembers collection
+      if (status === "approved" && projectId && userId) {
+        // Get user details from members collection
+        let userName = "Unknown User";
+        let userEmail = "";
+        
+        try {
+          const userDoc = await db.collection("members").doc(userId).get();
+          if (userDoc.exists) {
+            const userData = userDoc.data();
+            userName = userData?.name || userName;
+            userEmail = userData?.email || "";
+          }
+        } catch (err) {
+          console.warn("⚠️  Could not fetch user details:", err);
+        }
+        
+        // Add to projectMembers collection
+        await db.collection("projectMembers").add({
+          projectId,
+          userId,
+          userName,
+          userEmail,
+          role: "member",
+          joinedAt: serverTimestamp(),
+          addedBy: body.ownerId || "project-owner",
+        });
+        
+        console.log(`✅ Added user ${userId} to projectMembers for project ${projectId}`);
+      }
+      
+      // Record the decision in adminDecisions
+      await db.collection("adminDecisions").add({
+        type: "project_interest",
+        interestId,
+        projectId,
+        userId,
+        decision: status,
+        decidedBy: body.ownerId || "owner",
+        timestamp: serverTimestamp(),
+        interestData,
       });
       
-      console.log(`✅ Updated project interest ${interestId} to ${status}`);
+      console.log("✅ Recorded decision in adminDecisions");
       
-      // If approved, optionally add to interestedParticipants
-      if (status === "approved" && body.projectId && body.userId) {
-        await db.collection("interestedParticipants").add({
-          projectId: body.projectId,
-          userId: body.userId,
-          joinedAt: serverTimestamp(),
-        });
-        console.log("✅ Added to interestedParticipants");
-      }
+      // Always delete from projectInterests after processing
+      await db.collection("projectInterests").doc(interestId).delete();
+      console.log(`🗑️  Deleted project interest ${interestId}`);
       
       return NextResponse.json({ 
         ok: true, 
         message: `Request ${status}!`,
-        data: { id: interestId, status }
+        data: { id: interestId, status, deleted: true }
       });
     } catch (firestoreError) {
       console.warn("⚠️  Firestore update failed:", String(firestoreError));
@@ -163,5 +210,38 @@ export async function PATCH(request: Request) {
       },
       { status: 500 },
     );
+  }
+}
+
+// DELETE - Delete a project interest
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const interestId = searchParams.get("id");
+    
+    if (!interestId) {
+      return NextResponse.json(
+        { ok: false, message: "Missing interest ID" },
+        { status: 400 },
+      );
+    }
+    
+    console.log("🗑️  Deleting project interest:", interestId);
+    const db = getDb();
+    
+    await db.collection("projectInterests").doc(interestId).delete();
+    
+    console.log("✅ Deleted project interest");
+    return NextResponse.json({ 
+      ok: true, 
+      message: "Interest deleted" 
+    });
+  } catch (error) {
+    console.error("❌ Delete error:", error);
+    return NextResponse.json({ 
+      ok: false, 
+      message: "Failed to delete",
+      error: String(error)
+    }, { status: 500 });
   }
 }

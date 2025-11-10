@@ -29,7 +29,7 @@ const ManageProjectPage = () => {
   const [localRequests, setLocalRequests] = useState<ProjectInterest[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch project interests from Firestore
+    // Fetch project interests from Firestore
   useEffect(() => {
     const fetchInterests = async () => {
       try {
@@ -59,6 +59,58 @@ const ManageProjectPage = () => {
       return () => clearInterval(interval);
     }
   }, [projectId]);
+
+  const handleApprove = async (interestId: string, projectId: string, userId: string) => {
+    try {
+      const response = await fetch(`/api/project-interests`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          interestId,
+          status: "approved",
+          projectId,
+          userId,
+          deleteAfter: true // Delete the document after approval
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.ok) {
+        console.log("✅ Approved and deleted request:", interestId);
+        alert("✅ User approved to join the project!");
+        // fetchInterests will be called automatically by the interval
+      }
+    } catch (error) {
+      console.error("Failed to approve:", error);
+      alert("Failed to approve request. Please try again.");
+    }
+  };
+
+  const handleReject = async (interestId: string) => {
+    try {
+      const response = await fetch(`/api/project-interests`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          interestId, 
+          status: "rejected",
+          deleteAfter: true // Delete the document after rejection
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.ok) {
+        console.log("❌ Rejected and deleted request:", interestId);
+        alert("❌ Request rejected");
+        // fetchInterests will be called automatically by the interval
+      }
+    } catch (error) {
+      console.error("Failed to reject:", error);
+      alert("Failed to reject request. Please try again.");
+    }
+  };
 
   if (!project) {
     return (
@@ -95,66 +147,6 @@ const ManageProjectPage = () => {
       </PageContainer>
     );
   }
-
-  const handleApprove = async (interestId: string) => {
-    const request = localRequests.find((r) => r.id === interestId);
-    if (!request) return;
-
-    try {
-      const response = await fetch("/api/project-interests", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          interestId,
-          status: "approved",
-          projectId: request.projectId,
-          userId: request.userId,
-        }),
-      });
-
-      const result = await response.json();
-      
-      if (result.ok) {
-        console.log("✅ Approved request:", interestId);
-        alert(`✅ Approved ${request.userName || request.userId} to join ${project?.title}!`);
-        setLocalRequests((prev) => prev.filter((r) => r.id !== interestId));
-      } else {
-        alert(`Failed to approve: ${result.message}`);
-      }
-    } catch (error) {
-      console.error("❌ Error approving request:", error);
-      alert("Failed to approve request. Please try again.");
-    }
-  };
-
-  const handleReject = async (interestId: string) => {
-    const request = localRequests.find((r) => r.id === interestId);
-    if (!request) return;
-
-    try {
-      const response = await fetch("/api/project-interests", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          interestId,
-          status: "rejected",
-        }),
-      });
-
-      const result = await response.json();
-      
-      if (result.ok) {
-        console.log("❌ Rejected request:", interestId);
-        alert(`❌ Rejected ${request.userName || request.userId}'s request`);
-        setLocalRequests((prev) => prev.filter((r) => r.id !== interestId));
-      } else {
-        alert(`Failed to reject: ${result.message}`);
-      }
-    } catch (error) {
-      console.error("❌ Error rejecting request:", error);
-      alert("Failed to reject request. Please try again.");
-    }
-  };
 
   return (
     <PageContainer>
@@ -266,7 +258,7 @@ const ManageProjectPage = () => {
 
                     <div className="mt-4 flex gap-3">
                       <button
-                        onClick={() => handleApprove(request.id)}
+                        onClick={() => handleApprove(request.id, request.projectId, request.userId)}
                         className="flex flex-1 items-center justify-center gap-2 rounded-full bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-400 transition hover:bg-emerald-400/20"
                       >
                         <CheckCircle className="h-4 w-4" />
