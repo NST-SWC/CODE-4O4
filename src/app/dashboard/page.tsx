@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import {
   CalendarDays,
@@ -27,6 +27,7 @@ import {
 } from "@/lib/data";
 import { registerProjectInterest, rsvpToEvent } from "@/lib/firebase/firestore";
 import { formatDate } from "@/lib/utils";
+import type { ShowcaseProject } from "@/types";
 
 const STORAGE_KEYS = {
   projects: "project-interest-status",
@@ -70,6 +71,8 @@ const readCache = (key: string) => {
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
+  const [projects, setProjects] = useState<ShowcaseProject[]>(showcaseProjects);
+  const [loadingProjects, setLoadingProjects] = useState(true);
   const [projectStatus, setProjectStatus] = useState<Record<string, string>>(() =>
     readCache(STORAGE_KEYS.projects),
   );
@@ -80,6 +83,33 @@ export default function DashboardPage() {
     {},
   );
   const [toast, setToast] = useState<string | null>(null);
+
+  // Fetch projects from Firebase
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        console.log("🔄 Fetching projects from API...");
+        const response = await fetch("/api/projects");
+        const result = await response.json();
+        
+        if (result.ok && result.data) {
+          console.log(`✅ Fetched ${result.data.length} projects`);
+          setProjects(result.data);
+        } else {
+          console.warn("⚠️  Failed to fetch projects, using static data");
+        }
+      } catch (error) {
+        console.error("❌ Error fetching projects:", error);
+      } finally {
+        setLoadingProjects(false);
+      }
+    };
+
+    fetchProjects();
+    // Auto-refresh projects every 10 seconds
+    const interval = setInterval(fetchProjects, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const profile = useMemo(
     () => ({
