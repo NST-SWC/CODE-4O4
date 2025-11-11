@@ -16,7 +16,25 @@ const getServiceAccount = (): ServiceAccount | null => {
     vercel: process.env.VERCEL,
   });
 
-  // PRIORITY 1: Try individual environment variables (most reliable)
+  // PRIORITY 1: Try FIREBASE_SERVICE_ACCOUNT JSON (most reliable for Vercel)
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    try {
+      console.log("📝 Attempting to parse FIREBASE_SERVICE_ACCOUNT...");
+      const parsed = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      console.log("✅ Successfully parsed FIREBASE_SERVICE_ACCOUNT");
+      console.log("📋 Project ID from parsed JSON:", parsed.project_id);
+      return {
+        projectId: parsed.project_id?.trim(),
+        privateKey: parsed.private_key?.replace(/\\n/g, '\n'),
+        clientEmail: parsed.client_email?.trim(),
+      } as ServiceAccount;
+    } catch (error) {
+      console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT:", error);
+      console.error("First 100 chars:", process.env.FIREBASE_SERVICE_ACCOUNT?.substring(0, 100));
+    }
+  }
+
+  // PRIORITY 2: Fallback to individual environment variables
   const projectId = process.env.FIREBASE_PROJECT_ID?.trim();
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL?.trim();
   let privateKey = process.env.FIREBASE_PRIVATE_KEY;
@@ -39,24 +57,6 @@ const getServiceAccount = (): ServiceAccount | null => {
       clientEmail,
       privateKey,
     } as ServiceAccount;
-  }
-  
-  // PRIORITY 2: Fallback to FIREBASE_SERVICE_ACCOUNT JSON (less reliable)
-  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    try {
-      console.log("📝 Attempting to parse FIREBASE_SERVICE_ACCOUNT...");
-      const parsed = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-      console.log("✅ Successfully parsed FIREBASE_SERVICE_ACCOUNT");
-      console.log("📋 Project ID from parsed JSON:", parsed.project_id);
-      return {
-        projectId: parsed.project_id?.trim(),
-        privateKey: parsed.private_key?.replace(/\\n/g, '\n'),
-        clientEmail: parsed.client_email?.trim(),
-      } as ServiceAccount;
-    } catch (error) {
-      console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT:", error);
-      console.error("First 100 chars:", process.env.FIREBASE_SERVICE_ACCOUNT?.substring(0, 100));
-    }
   }
   
   console.error("❌ No Firebase credentials found in environment variables");

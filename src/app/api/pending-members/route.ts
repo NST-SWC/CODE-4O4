@@ -9,16 +9,24 @@ export async function GET(request: Request) {
     console.log("🔄 Fetching pending members...");
     const db = getDb();
     
+    // Fetch all pending members without orderBy to avoid index requirement
     const snapshot = await db
       .collection("pendingMembers")
       .where("status", "==", "pending")
-      .orderBy("createdAt", "desc")
       .get();
     
-    const pendingMembers = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    // Sort in JavaScript instead
+    const pendingMembers = snapshot.docs
+      .map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      .sort((a: any, b: any) => {
+        // Sort by createdAt descending (newest first)
+        const aTime = a.createdAt?.toMillis?.() || a.createdAt?.seconds * 1000 || 0;
+        const bTime = b.createdAt?.toMillis?.() || b.createdAt?.seconds * 1000 || 0;
+        return bTime - aTime;
+      });
     
     console.log(`✅ Found ${pendingMembers.length} pending members`);
     
