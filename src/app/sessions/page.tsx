@@ -1,5 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import { calendarSessions } from "@/lib/data";
+import { useState, useEffect } from "react";
 import { PageContainer } from "@/components/shared/page-container";
 import { PageIntro } from "@/components/shared/page-intro";
 import { formatDate } from "@/lib/utils";
@@ -44,7 +46,29 @@ const sessionModules = [
   },
 ];
 
-const SessionsPage = () => (
+const SessionsPage = () => {
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        const response = await fetch("/api/sessions");
+        const result = await response.json();
+        if (result.ok) {
+          setSessions(result.data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching sessions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSessions();
+  }, []);
+
+  return (
   <PageContainer>
     <PageIntro
       badge="CLUB SESSIONS"
@@ -63,19 +87,24 @@ const SessionsPage = () => (
     <section className="mt-10 space-y-6">
       <h2 className="text-2xl font-semibold">Upcoming calendar</h2>
       <div className="grid gap-4 md:grid-cols-2">
-        {calendarSessions.map((session) => (
-          <article
-            key={session.id}
-            className="rounded-3xl border border-white/10 bg-white/5 p-6"
-          >
-            <div className="flex flex-wrap items-center justify-between text-xs uppercase tracking-[0.3em] text-white/60">
-              <span>{session.type}</span>
-              <span>{formatDate(session.date, { weekday: "long" })}</span>
-            </div>
-            <h3 className="mt-2 text-xl font-semibold">{session.title}</h3>
-            <p className="text-sm text-white/70">{session.focus}</p>
-            <p className="mt-4 text-xs text-white/50">
-              Starts {formatDate(session.date, { month: "long", day: "numeric" })}
+        {loading ? (
+          <div className="col-span-full text-center text-white/60 py-12">Loading sessions...</div>
+        ) : sessions.length === 0 ? (
+          <div className="col-span-full text-center text-white/60 py-12">No upcoming sessions</div>
+        ) : (
+          sessions.map((session) => (
+            <article
+              key={session.id}
+              className="rounded-3xl border border-white/10 bg-white/5 p-6"
+            >
+              <div className="flex flex-wrap items-center justify-between text-xs uppercase tracking-[0.3em] text-white/60">
+                <span>{session.type}</span>
+                <span>{formatDate(session.date, { weekday: "long" })}</span>
+              </div>
+              <h3 className="mt-2 text-xl font-semibold">{session.title}</h3>
+              <p className="text-sm text-white/70">{session.description || session.focus || 'Workshop session'}</p>
+              <p className="mt-4 text-xs text-white/50">
+                Starts {formatDate(session.date, { month: "long", day: "numeric" })}
             </p>
           </article>
         ))}
