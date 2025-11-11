@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Plus, Settings } from "lucide-react";
-import { showcaseProjects } from "@/lib/data";
 import { PageContainer } from "@/components/shared/page-container";
 import { PageIntro } from "@/components/shared/page-intro";
 import { useAuth } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
 import { registerProjectInterest } from "@/lib/firebase/firestore";
+import type { ShowcaseProject } from "@/types";
 
 const PROJECT_STATUS_KEY = "project-interest-status";
 
@@ -25,10 +25,39 @@ const readProjectCache = () => {
 
 const ProjectsPage = () => {
   const { user } = useAuth();
+  const [projects, setProjects] = useState<ShowcaseProject[]>([]);
+  const [loading, setLoading] = useState(true);
   const [projectState, setProjectState] = useState<Record<string, string>>(
     readProjectCache,
   );
   const canRequest = useMemo(() => Boolean(user), [user]);
+
+  // Fetch projects from Firebase
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        console.log("🔄 Fetching projects from API...");
+        const response = await fetch("/api/projects");
+        const result = await response.json();
+        
+        if (result.ok && result.data) {
+          console.log(`✅ Fetched ${result.data.length} projects`);
+          setProjects(result.data);
+        } else {
+          console.warn("⚠️  Failed to fetch projects:", result.message);
+        }
+      } catch (error) {
+        console.error("❌ Error fetching projects:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(fetchProjects, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleJoin = async (projectId: string) => {
     if (!user) return;
@@ -72,10 +101,28 @@ const ProjectsPage = () => {
         </div>
       }
     />      <div className="mt-10 grid gap-6">
-        {showcaseProjects.map((project) => {
+        {loading ? (
+          <div className="text-center text-white/60 py-12">
+            <p>Loading projects...</p>
+          </div>
+        ) : projects.length === 0 ? (
+          <div className="text-center text-white/60 py-12">
+            <p className="mb-4">No projects found yet.</p>
+            {user && (
+              <Link
+                href="/dashboard/projects/create"
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#00f5c4] to-[#00c2ff] px-5 py-2 text-sm font-medium text-black transition hover:opacity-90"
+              >
+                <Plus className="h-4 w-4" />
+                Create First Project
+              </Link>
+            )}
+          </div>
+        ) : (
+          projects.map((project) => {
           const status = projectState[project.id];
           // Check ownership by user ID (more reliable than name matching)
-          const isOwner = user && (project.ownerId === user.id || project.owner.startsWith(user.name));
+          const isOwner = user && (project.ownerId === user.id || (project.owner && project.owner.startsWith(user.name)));
           return (
             <article
               key={project.id}
@@ -91,16 +138,18 @@ const ProjectsPage = () => {
                 </span>
               </div>
               <p className="mt-3 text-sm text-white/70">{project.description}</p>
-              <div className="mt-4 flex flex-wrap gap-2 text-xs text-white/70">
-                {project.tech.map((tech) => (
-                  <span
-                    key={tech}
-                    className="rounded-full border border-white/15 px-3 py-1"
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
+              {project.tech && (
+                <div className="mt-4 flex flex-wrap gap-2 text-xs text-white/70">
+                  {(Array.isArray(project.tech) ? project.tech : [project.tech]).map((tech: string, idx: number) => (
+                    <span
+                      key={`${tech}-${idx}`}
+                      className="rounded-full border border-white/15 px-3 py-1"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              )}
               <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-white/60">
                 <span>Owner: {project.owner}</span>
                 <span className="text-xs uppercase tracking-[0.3em] text-white/40">
@@ -142,7 +191,8 @@ const ProjectsPage = () => {
               </div>
             </article>
           );
-        })}
+        })
+        )}
       </div>
     </PageContainer>
   );
