@@ -1,0 +1,20 @@
+<!-- This is a placeholder SVG for PWA icons -->
+<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#000000"/>
+  
+  <!-- Gradient overlay -->
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Icon design - Code brackets -->
+  <text x="256" y="340" font-family="monospace" font-size="200" font-weight="bold" text-anchor="middle" fill="url(#grad)">&lt;/&gt;</text>
+  
+  <!-- Text -->
+  <text x="256" y="430" font-family="Arial, sans-serif" font-size="40" font-weight="bold" text-anchor="middle" fill="#06b6d4">404</text>
+  <text x="256" y="470" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="#ffffff">DEV CLUB</text>
+</svg>

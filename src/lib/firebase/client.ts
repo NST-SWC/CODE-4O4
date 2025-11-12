@@ -1,5 +1,6 @@
 import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
 import type { FirebaseOptions } from "firebase/app";
+import { getMessaging, type Messaging } from "firebase/messaging";
 
 const firebaseConfig: FirebaseOptions | null =
   process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
@@ -26,4 +27,16 @@ export const getFirebaseApp = (): FirebaseApp | null => {
     return getApps()[0]!;
   }
   return initializeApp(firebaseConfig);
+};
+
+export const getFirebaseMessaging = (): Messaging | null => {
+  try {
+    const app = getFirebaseApp();
+    if (!app) return null;
+    if (typeof window === "undefined") return null;
+    return getMessaging(app);
+  } catch (error) {
+    console.error("Error initializing Firebase Messaging:", error);
+    return null;
+  }
 };

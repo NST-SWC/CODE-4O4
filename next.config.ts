@@ -13,6 +13,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Empty turbopack config to silence the warning
+  // Service workers work fine without special configuration
+  turbopack: {},
 };
 
 export default nextConfig;

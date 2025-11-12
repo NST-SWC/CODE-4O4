@@ -53,13 +53,11 @@ const AdminPage = () => {
     }
   }, [isAuthenticated, user, router]);
 
-  // Don't render anything if not admin
-  if (!isAuthenticated || user?.role !== "admin") {
-    return null;
-  }
-
   // Fetch pending members
   useEffect(() => {
+    if (!isAuthenticated || user?.role !== "admin") {
+      return;
+    }
     const fetchPendingMembers = async () => {
       try {
         console.log("🔄 Fetching pending members...");
@@ -85,6 +83,10 @@ const AdminPage = () => {
 
   // Fetch project interests from Firestore
   useEffect(() => {
+    if (!isAuthenticated || user?.role !== "admin") {
+      return;
+    }
+    
     const fetchInterests = async () => {
       try {
         console.log("🔄 Fetching all project interests...");
@@ -108,7 +110,7 @@ const AdminPage = () => {
     
     // Removed auto-refresh to save Firebase reads
     // Admins can refresh page manually to see new requests
-  }, []);
+  }, [isAuthenticated, user]);
 
   const handleApproveMember = async (memberId: string, memberEmail: string, memberName: string) => {
     if (!confirm(`Approve ${memberName} to join the club?`)) return;
@@ -245,6 +247,11 @@ const AdminPage = () => {
       setRegenerating(false);
     }
   };
+
+  // Don't render anything if not admin (check AFTER all hooks)
+  if (!isAuthenticated || user?.role !== "admin") {
+    return null;
+  }
 
   return (
   <PageContainer>

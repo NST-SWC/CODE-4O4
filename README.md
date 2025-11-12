@@ -7,6 +7,7 @@ A smooth, neon-inspired developer club experience built with Next.js 16, Tailwin
 - CTA buttons trigger fully validated modals for **Join Club** (rich application form) and **username/password login** (no Firebase Auth dependency). Successful logins now redirect to the dashboard automatically.
 - Projects, events, calendar previews, leaderboard teaser, and admin queue now live on their own dedicated routes _and_ have callouts on the homepage.
 - `/dashboard` route recreates the internal portal with stats, project request flows, event RSVPs, sprint calendar, leaderboard, and approval widgets.
+- **🔔 Push Notifications** - Real-time notifications for events, project updates, and admin decisions via Firebase Cloud Messaging with PWA support
 - Firebase helpers for join requests, project interest, and event RSVPs now POST through secure Next.js API routes that write to Firestore with the provided service account. (If you remove the sample credentials, set `FIREBASE_SERVICE_ACCOUNT` with your own JSON.)
 
 ### 🧰 Stack
@@ -43,6 +44,10 @@ Replace these with your own authentication mechanism (or connect to Firebase Aut
    cp .env.local.example .env.local
    ```
 4. (Optional) Instead of env vars you can drop a service account JSON at the project root (one is provided for local demo). The API routes under `src/app/api/*` all use `firebase-admin` so requests persist even without client-side Firebase config.
+5. **Enable Cloud Messaging** for push notifications:
+   - Go to Firebase Console > Project Settings > Cloud Messaging
+   - Generate VAPID key and add to `.env.local` as `NEXT_PUBLIC_FIREBASE_VAPID_KEY`
+   - See [NOTIFICATION_SYSTEM.md](./NOTIFICATION_SYSTEM.md) for complete setup guide
 
 Without valid credentials, all Firebase-powered actions remain in **preview mode** (requests resolve locally so you can demo the flow without writes).
 

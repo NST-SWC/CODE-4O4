@@ -1,5 +1,6 @@
 import { cert, getApps, initializeApp, type App } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import { getMessaging as getAdminMessaging } from "firebase-admin/messaging";
 import type { ServiceAccount } from "firebase-admin";
 
 let adminApp: App | null = null;
@@ -128,4 +129,17 @@ export const getDb = () => {
     throw error;
   }
 };
+
+export const getMessaging = () => {
+  try {
+    const app = getAdminApp();
+    const messaging = getAdminMessaging(app);
+    console.log("Messaging instance obtained");
+    return messaging;
+  } catch (error) {
+    console.error("Failed to get Messaging instance:", error);
+    return null;
+  }
+};
+
 export const serverTimestamp = FieldValue.serverTimestamp;

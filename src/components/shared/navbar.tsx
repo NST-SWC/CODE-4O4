@@ -1,83 +1,243 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
+import NotificationBell from "@/components/notifications/notification-bell";
+import { Menu, X, Home, Folder, Calendar, BookOpen, Trophy, Shield, LogOut, User } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const router = useRouter();
   const { user, logout } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
+  // Prevent scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isMobileMenuOpen]);
 
   const navItems = [
-    { name: "Dashboard", path: "/dashboard" },
-    { name: "Projects", path: "/projects" },
-    { name: "Events", path: "/events" },
-    { name: "Sessions", path: "/sessions" },
-    { name: "Leaderboard", path: "/leaderboard" },
+    { name: "Dashboard", path: "/dashboard", icon: Home },
+    { name: "Projects", path: "/projects", icon: Folder },
+    { name: "Events", path: "/events", icon: Calendar },
+    { name: "Sessions", path: "/sessions", icon: BookOpen },
+    { name: "Leaderboard", path: "/leaderboard", icon: Trophy },
   ];
 
   // Only show Admin link for admin and mentor roles
   if (user?.role === "admin" || user?.role === "mentor") {
-    navItems.push({ name: "Admin", path: "/admin" });
+    navItems.push({ name: "Admin", path: "/admin", icon: Shield });
   }
 
   const handleLogout = () => {
     logout();
+    setIsMobileMenuOpen(false);
   };
 
+  const isActive = (path: string) => pathname === path || pathname?.startsWith(path + "/");
+
   return (
-    <nav className="flex items-center justify-between py-4 px-10 bg-black text-white border-b border-white/10">
-      <Link href="/" className="tracking-[0.3em] font-semibold text-sm hover:text-cyan-400 transition-colors">
-        CODE 4O4 DEV CLUB
-      </Link>
-
-      <ul className="flex gap-8">
-        {navItems.map((item) => {
-          const isActive = pathname === item.path || pathname?.startsWith(item.path + "/");
-          
-          return (
-            <li key={item.name}>
-              <Link
-                href={item.path}
-                className={`transition-colors duration-200 ${
-                  isActive 
-                    ? "text-cyan-400 font-semibold" 
-                    : "text-gray-300 hover:text-white"
-                }`}
-              >
-                {item.name}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-
-      <div className="flex items-center gap-3">
-        <button 
-          onClick={handleLogout}
-          className="hover:text-cyan-400 transition-colors"
-        >
-          Logout
-        </button>
+    <>
+      {/* Desktop Navbar - Hidden on Mobile */}
+      <nav className="hidden lg:flex sticky top-0 z-40 items-center justify-between py-3 px-4 md:px-10 bg-black/95 backdrop-blur-sm text-white border-b border-white/10">
+        {/* Logo */}
         <Link 
-          href="/dashboard/profile"
-          className="flex items-center gap-2 border border-white/20 rounded-full px-3 py-1 hover:border-cyan-400/50 transition-colors"
+          href="/" 
+          className="tracking-[0.3em] font-semibold text-xs md:text-sm hover:text-cyan-400 transition-colors flex-shrink-0"
         >
-          {user?.avatar ? (
-            <img
-              src={user.avatar}
-              alt={user.name || "avatar"}
-              className="w-6 h-6 rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-xs font-semibold">
-              {user?.name?.charAt(0).toUpperCase() || "U"}
-            </div>
-          )}
-          <span className="text-sm">{user?.name || "User"}</span>
+          CODE 4O4
         </Link>
+
+        {/* Desktop Navigation */}
+        <ul className="flex gap-6 xl:gap-8">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <li key={item.name}>
+                <Link
+                  href={item.path}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                    isActive(item.path)
+                      ? "text-cyan-400 bg-cyan-400/10 font-semibold" 
+                      : "text-gray-300 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{item.name}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+
+        {/* Desktop Right Side */}
+        <div className="flex items-center gap-3">
+          <NotificationBell />
+          <button 
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-white/5 transition-all"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="text-sm">Logout</span>
+          </button>
+          <Link 
+            href="/dashboard/profile"
+            className="flex items-center gap-2 border border-white/20 rounded-full px-3 py-1.5 hover:border-cyan-400/50 hover:bg-white/5 transition-all"
+          >
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.name || "avatar"}
+                className="w-6 h-6 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-xs font-semibold">
+                {user?.name?.charAt(0).toUpperCase() || "U"}
+              </div>
+            )}
+            <span className="text-sm hidden xl:inline">{user?.name || "User"}</span>
+          </Link>
+        </div>
+      </nav>
+
+      {/* Mobile: Floating Action Buttons - Bottom Right */}
+      <div className="lg:hidden fixed bottom-6 right-4 z-50 flex flex-col gap-3">
+        {/* Notification Button */}
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          className="bg-gray-900 border border-white/20 rounded-full p-3 shadow-lg backdrop-blur-sm"
+        >
+          <NotificationBell />
+        </motion.div>
+
+        {/* Menu Button */}
+        <motion.button
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="bg-cyan-500 hover:bg-cyan-600 text-white rounded-full p-4 shadow-lg transition-all duration-200 hover:shadow-cyan-500/50"
+          aria-label="Toggle menu"
+        >
+          {isMobileMenuOpen ? (
+            <X className="w-6 h-6" />
+          ) : (
+            <Menu className="w-6 h-6" />
+          )}
+        </motion.button>
       </div>
-    </nav>
+
+      {/* Mobile Sidebar Menu */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+            />
+
+            {/* Sidebar */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 h-full w-80 bg-gray-900 border-l border-white/10 z-50 lg:hidden overflow-y-auto"
+            >
+              <div className="flex flex-col h-full">
+                {/* Header */}
+                <div className="flex items-center justify-between p-6 border-b border-white/10">
+                  <h2 className="text-lg font-semibold text-white">Menu</h2>
+                  <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* User Profile */}
+                <Link
+                  href="/dashboard/profile"
+                  className="flex items-center gap-3 p-6 border-b border-white/10 hover:bg-white/5 transition-colors"
+                >
+                  {user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user.name || "avatar"}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-lg font-semibold">
+                      {user?.name?.charAt(0).toUpperCase() || "U"}
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <p className="font-semibold text-white">{user?.name || "User"}</p>
+                    <p className="text-xs text-gray-400 capitalize">{user?.role || "Member"}</p>
+                  </div>
+                  <User className="w-4 h-4 text-gray-400" />
+                </Link>
+
+                {/* Navigation Links */}
+                <nav className="flex-1 p-4">
+                  <ul className="space-y-1">
+                    {navItems.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <li key={item.name}>
+                          <Link
+                            href={item.path}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                              isActive(item.path)
+                                ? "text-cyan-400 bg-cyan-400/10 font-semibold" 
+                                : "text-gray-300 hover:text-white hover:bg-white/5"
+                            }`}
+                          >
+                            <Icon className="w-5 h-5" />
+                            <span>{item.name}</span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </nav>
+
+                {/* Logout Button */}
+                <div className="p-4 border-t border-white/10">
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg text-red-400 hover:bg-red-400/10 transition-all font-medium"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

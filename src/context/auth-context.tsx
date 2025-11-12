@@ -47,6 +47,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setHydrated(true);
   }, []);
 
+  useEffect(() => {
+    // Ensure cookie is set if user exists in localStorage but cookie is missing
+    // This runs after hydration to restore session cookie on page refresh
+    if (typeof window !== "undefined" && user && hydrated) {
+      const hasCookie = document.cookie.includes('code404-user');
+      if (!hasCookie) {
+        console.log('🔄 Restoring session cookie from localStorage');
+        const isSecure = window.location.protocol === 'https:';
+        const cookieValue = encodeURIComponent(JSON.stringify(user));
+        const cookieParts = [
+          `code404-user=${cookieValue}`,
+          'path=/',
+          'max-age=2592000', // 30 days
+          'SameSite=Lax',
+        ];
+        if (isSecure) {
+          cookieParts.push('Secure');
+        }
+        document.cookie = cookieParts.join('; ');
+      }
+    }
+  }, [user, hydrated]);
+
   const login = useCallback(async ({
     username,
     password,
@@ -69,18 +92,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (typeof window !== "undefined") {
           window.localStorage.setItem(STORAGE_KEY, JSON.stringify(result.user));
           // Set cookie for middleware authentication check
-          // Use Secure flag in production (HTTPS)
+          // Note: In development (localhost), cookies work without Secure flag
           const isSecure = window.location.protocol === 'https:';
-          const cookieOptions = [
-            `code404-user=${encodeURIComponent(JSON.stringify(result.user))}`,
+          const cookieValue = encodeURIComponent(JSON.stringify(result.user));
+          const cookieParts = [
+            `code404-user=${cookieValue}`,
             'path=/',
-            'max-age=2592000',
+            'max-age=2592000', // 30 days
             'SameSite=Lax',
           ];
           if (isSecure) {
-            cookieOptions.push('Secure');
+            cookieParts.push('Secure');
           }
-          document.cookie = cookieOptions.join('; ');
+          document.cookie = cookieParts.join('; ');
+          
+          // Debug: Verify cookie was set
+          console.log('🍪 Cookie set:', document.cookie.includes('code404-user') ? 'Success' : 'Failed');
         }
         return {
           ok: true,
@@ -121,16 +148,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUser));
         // Use Secure flag in production (HTTPS)
         const isSecure = window.location.protocol === 'https:';
-        const cookieOptions = [
-          `code404-user=${encodeURIComponent(JSON.stringify(updatedUser))}`,
+        const cookieValue = encodeURIComponent(JSON.stringify(updatedUser));
+        const cookieParts = [
+          `code404-user=${cookieValue}`,
           'path=/',
-          'max-age=2592000',
+          'max-age=2592000', // 30 days
           'SameSite=Lax',
         ];
         if (isSecure) {
-          cookieOptions.push('Secure');
+          cookieParts.push('Secure');
         }
-        document.cookie = cookieOptions.join('; ');
+        document.cookie = cookieParts.join('; ');
       }
       
       return updatedUser;
