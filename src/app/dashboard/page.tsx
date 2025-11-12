@@ -4,20 +4,14 @@ import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  CalendarDays,
-  Clock,
   Layers,
-  ListChecks,
-  LogOut,
+  Clock,
   Plus,
-  Settings,
-  ShieldCheck,
   Users,
-  User,
-  Menu,
-  X,
+  Settings,
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
+import { PageContainer } from "@/components/shared/page-container";
 import { Button } from "@/components/ui/button";
 import { registerProjectInterest, rsvpToEvent } from "@/lib/firebase/firestore";
 import { formatDate } from "@/lib/utils";
@@ -27,13 +21,6 @@ const STORAGE_KEYS = {
   projects: "project-interest-status",
   events: "event-rsvp-status",
 };
-
-const navLinks = [
-  { label: "Projects", icon: ListChecks, href: "/projects" },
-  { label: "Events", icon: CalendarDays, href: "/events" },
-  { label: "Sessions", icon: Clock, href: "/sessions" },
-  { label: "Admin", icon: ShieldCheck, href: "/admin" },
-];
 
 const toneMap: Record<string, string> = {
   emerald: "from-emerald-400/25 to-emerald-500/10 text-emerald-200",
@@ -54,11 +41,10 @@ const readCache = (key: string) => {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [projects, setProjects] = useState<ShowcaseProject[]>([]);
   const [userProjects, setUserProjects] = useState<any[]>([]);
   const [upcomingSessions, setUpcomingSessions] = useState<any[]>([]);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [stats, setStats] = useState({
     activeProjects: 0,
     upcomingSessions: 0,
@@ -162,117 +148,20 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#010107] text-white">
-      {/* Top Navigation Bar */}
-      <div className="sticky top-0 z-50 border-b border-white/10 bg-[#010107]/95 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-8">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.3em]">CODE 4O4 Dev Club</p>
-            </div>
-            <nav className="hidden items-center gap-1 md:flex">
-              {navLinks
-                .filter((link) => link.label !== "Admin" || profile.role === "admin")
-                .map((link) => (
-                  <Link
-                    key={link.label}
-                    href={link.href}
-                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/70 transition hover:bg-white/5 hover:text-white"
-                  >
-                    <link.icon className="h-4 w-4" />
-                    {link.label}
-                  </Link>
-                ))}
-            </nav>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard/profile"
-              className="flex items-center gap-2 rounded-full border border-white/15 px-3 py-2 text-sm text-white/80 transition hover:border-emerald-300 hover:text-white"
-            >
-              {user?.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt={user?.name || "User"}
-                  className="h-6 w-6 rounded-full object-cover"
-                />
-              ) : (
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400 text-xs font-semibold text-black">
-                  {user?.name?.charAt(0).toUpperCase() || "U"}
-                </div>
-              )}
-              <span className="hidden sm:inline">{user?.name?.split(" ")[0] || "User"}</span>
-            </Link>
-            <Button 
-              variant="ghost" 
-              onClick={logout}
-              className="hidden lg:flex"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="ml-2">Logout</span>
-            </Button>
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="rounded-lg p-2 transition hover:bg-white/5 md:hidden"
-            >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
-          </div>
+    <PageContainer>
+      <div className="space-y-8">
+        {/* Welcome Header */}
+        <div className="rounded-3xl border border-white/10 bg-black/40 p-6">
+          <p className="text-sm uppercase tracking-[0.3em] text-emerald-200">
+            Welcome back
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold">
+            {user?.name ?? "Member"}
+          </h1>
+          <p className="text-sm text-white/60">
+            Here&apos;s what&apos;s happening in the club today.
+          </p>
         </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="border-t border-white/10 bg-black/40 backdrop-blur-sm md:hidden">
-            <nav className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
-              <div className="flex flex-col gap-2">
-                {navLinks
-                  .filter((link) => link.label !== "Admin" || profile.role === "admin")
-                  .map((link) => (
-                    <Link
-                      key={link.label}
-                      href={link.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-white/70 transition hover:bg-white/5 hover:text-white"
-                    >
-                      <link.icon className="h-4 w-4" />
-                      {link.label}
-                    </Link>
-                  ))}
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    logout();
-                  }}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-white/70 transition hover:bg-white/5 hover:text-white"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Logout
-                </button>
-              </div>
-            </nav>
-          </div>
-        )}
-      </div>
-
-      {/* Main Content */}
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <main className="space-y-8">
-          <div className="rounded-3xl border border-white/10 bg-black/40 p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-emerald-200">
-                  Welcome back
-                </p>
-                <h1 className="mt-2 text-3xl font-semibold">
-                  {user?.name ?? "Member"}
-                </h1>
-                <p className="text-sm text-white/60">
-                  Here&apos;s what&apos;s happening in the club today.
-                </p>
-              </div>
-            </div>
-          </div>
 
           <section className="grid gap-4 grid-cols-2 lg:grid-cols-3">
             {dynamicStatCards.map((card) => (
@@ -430,8 +319,7 @@ export default function DashboardPage() {
               </div>
             </div>
           </section>
-        </main>
-      </div>
-    </div>
+        </div>
+      </PageContainer>
   );
 }

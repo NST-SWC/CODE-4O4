@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -34,41 +34,6 @@ export const HomeLanding = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const router = useRouter();
 
-  // Dynamic data from Firebase
-  const [projects, setProjects] = useState<any[]>([]);
-  const [events, setEvents] = useState<any[]>([]);
-  const [sessions, setSessions] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // Fetch data from Firebase
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [projectsRes, eventsRes, sessionsRes] = await Promise.all([
-          fetch("/api/projects"),
-          fetch("/api/events"),
-          fetch("/api/sessions"),
-        ]);
-
-        const [projectsData, eventsData, sessionsData] = await Promise.all([
-          projectsRes.json(),
-          eventsRes.json(),
-          sessionsRes.json(),
-        ]);
-
-        if (projectsData.ok) setProjects(projectsData.data || []);
-        if (eventsData.ok) setEvents(eventsData.data || []);
-        if (sessionsData.ok) setSessions(sessionsData.data || []);
-      } catch (error) {
-        console.error("Error fetching home page data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
   const handleLogin = useCallback(() => {
     if (isAuthenticated) {
       router.push("/dashboard");
@@ -94,9 +59,6 @@ export const HomeLanding = () => {
             onLogin={handleLogin}
             user={user}
             isAuthenticated={isAuthenticated}
-            projects={projects}
-            sessions={sessions}
-            loading={loading}
           />
           <StatsRow />
           <FeatureGrid />
@@ -118,6 +80,7 @@ const navRoutes: Array<{ label: string; href: string; requiresAuth?: boolean }> 
   { label: "Projects", href: "/projects" },
   { label: "Events", href: "/events" },
   { label: "Sessions", href: "/sessions" },
+  { label: "Leaderboard", href: "/leaderboard" },
 ];
 
 const Header = ({
@@ -132,104 +95,113 @@ const Header = ({
   onLogout: () => void;
   user: MaybeUser;
   isAuthenticated: boolean;
-}) => (
-  <header className="glass-panel flex flex-col gap-4 border border-white/10 px-6 py-4 md:flex-row md:items-center md:justify-between">
-    <div className="flex items-center gap-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#00f5c4]/30 to-[#00a2ff]/30 font-semibold text-[#00f5c4]">
-        NST
-      </div>
-      <div>
-        <p className="text-base font-semibold tracking-tight">
-          CODE 4O4 Dev Club
-        </p>
-        <p className="text-xs uppercase tracking-[0.25em] text-white/60">
-          {isAuthenticated ? "" : "Build · Learn · Grow"}
-        </p>
-      </div>
-    </div>
-    <nav className="flex flex-wrap items-center gap-4 text-sm text-white/70">
-      {navRoutes.map((link) =>
-        link.requiresAuth && !isAuthenticated ? (
-          <button
-            key={link.label}
-            onClick={onLogin}
-            className="transition hover:text-white"
-          >
-            {link.label}
-          </button>
-        ) : (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="transition hover:text-white"
-          >
-            {link.label}
-          </Link>
-        ),
-      )}
-    </nav>
-    <div className="flex flex-wrap items-center gap-3">
-      {isAuthenticated && user ? (
-        <>
-          <Link
-            href="/dashboard/profile"
-            className="flex items-center gap-3 rounded-full border border-white/15 px-4 py-2 text-sm text-white/80 transition hover:border-emerald-300 hover:text-white"
-          >
-            {user.avatar ? (
-              <div className="relative h-8 w-8 overflow-hidden rounded-full border border-white/20">
-                <Image
-                  src={user.avatar}
-                  alt={user.name}
-                  fill
-                  sizes="32px"
-                  className="object-cover"
-                />
-              </div>
+}) => {
+  const pathname = usePathname();
+
+  const isActiveLink = (href: string) => {
+    if (href === "/") {
+      return pathname === "/";
+    }
+    return pathname === href || pathname?.startsWith(href + "/");
+  };
+
+  // Show admin link for admin and mentor roles
+  const showAdminLink = user?.role === "admin" || user?.role === "mentor";
+  const navigationLinks = isAuthenticated && showAdminLink 
+    ? [...navRoutes, { label: "Admin", href: "/admin" }]
+    : navRoutes;
+
+  return (
+    <header className="mb-8 rounded-2xl border border-white/5 bg-black/20 backdrop-blur-md px-4 py-3">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <Link href="/" className="text-sm uppercase tracking-[0.4em] text-white/70 hover:text-cyan-400 transition-colors">
+          CODE 4O4 DEV CLUB
+        </Link>
+        <nav className="flex flex-wrap items-center gap-3 text-sm">
+          {navigationLinks.map((link) => {
+            const isActive = isActiveLink(link.href);
+            
+            return link.requiresAuth && !isAuthenticated ? (
+              <button
+                key={link.label}
+                onClick={onLogin}
+                className="rounded-full px-3 py-1.5 text-white/70 transition-colors duration-200 hover:text-white hover:bg-white/5"
+              >
+                {link.label}
+              </button>
             ) : (
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400 text-sm font-semibold text-black">
-                {user.name.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <span>{user.name.split(" ")[0]}</span>
-          </Link>
-          <Button variant="ghost" onClick={onLogout}>
-            Logout
-          </Button>
-        </>
-      ) : (
-        <>
-          <Button variant="ghost" onClick={onLogin}>
-            Login
-          </Button>
-          <Button onClick={onJoin} glow>
-            Join Club
-          </Button>
-        </>
-      )}
-    </div>
-  </header>
-);
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`rounded-full px-3 py-1.5 transition-colors duration-200 ${
+                  isActive 
+                    ? "text-cyan-400 font-semibold bg-cyan-400/10" 
+                    : "text-white/70 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
+          {isAuthenticated && user && (
+            <>
+              <Button 
+                variant="ghost" 
+                onClick={onLogout}
+                className="hover:text-cyan-400 transition-colors text-white/70 hover:bg-white/5"
+              >
+                Logout
+              </Button>
+              <Link
+                href="/dashboard/profile"
+                className="flex items-center gap-2 rounded-full border border-white/15 px-3 py-1.5 text-white/80 transition hover:border-cyan-400/50 hover:text-white"
+              >
+                {user.avatar ? (
+                  <div className="relative h-8 w-8 overflow-hidden rounded-full border border-white/20">
+                    <Image
+                      src={user.avatar}
+                      alt={user.name}
+                      fill
+                      sizes="32px"
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400 text-sm font-semibold text-black">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span>{user.name.split(" ")[0]}</span>
+              </Link>
+            </>
+          )}
+          {!isAuthenticated && (
+            <>
+              <Button variant="ghost" onClick={onLogin}>
+                Login
+              </Button>
+              <Button onClick={onJoin} glow>
+                Join Club
+              </Button>
+            </>
+          )}
+        </nav>
+      </div>
+    </header>
+  );
+};
 
 const Hero = ({
   onJoin,
   onLogin,
   user,
   isAuthenticated,
-  projects,
-  sessions,
-  loading,
 }: {
   onJoin: () => void;
   onLogin: () => void;
   user: MaybeUser;
   isAuthenticated: boolean;
-  projects: any[];
-  sessions: any[];
-  loading: boolean;
 }) => {
-  const latestSession = sessions[0];
-  const activeProjects = projects.filter(p => p.status === "active").slice(0, 2);
-  
   return (
   <section id="join" className="mt-16 grid gap-12 lg:grid-cols-[1.1fr_0.9fr]">
     <motion.div

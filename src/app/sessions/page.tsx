@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { PageContainer } from "@/components/shared/page-container";
 import { PageIntro } from "@/components/shared/page-intro";
 import { formatDate } from "@/lib/utils";
+import { useAuth } from "@/context/auth-context";
 
 const sessionModules = [
   {
@@ -47,8 +48,12 @@ const sessionModules = [
 ];
 
 const SessionsPage = () => {
+  const { user } = useAuth();
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Check if user is admin or mentor
+  const canManageSessions = user?.role === "admin" || user?.role === "mentor";
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -75,12 +80,22 @@ const SessionsPage = () => {
       title="Wednesday & Friday build nights"
       description="Live workshops start 12 November. We meet twice a week to cover HTML, CSS, and front-end fundamentals before jumping into collaborative projects."
       actions={
-        <Link
-          href="/events"
-          className="rounded-full border border-white/10 px-5 py-2 text-sm text-white/70 transition hover:border-emerald-300/60 hover:text-white"
-        >
-          View events
-        </Link>
+        <div className="flex gap-3">
+          {canManageSessions && (
+            <Link
+              href="/admin/sessions"
+              className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-5 py-2 text-sm text-cyan-400 transition hover:border-cyan-400 hover:bg-cyan-500/20"
+            >
+              Manage Sessions
+            </Link>
+          )}
+          <Link
+            href="/events"
+            className="rounded-full border border-white/10 px-5 py-2 text-sm text-white/70 transition hover:border-emerald-300/60 hover:text-white"
+          >
+            View events
+          </Link>
+        </div>
       }
     />
 
