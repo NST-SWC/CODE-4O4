@@ -67,8 +67,9 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    // Exclude API, Next internals, favicon, and public PWA/static assets so they
-    // can be fetched directly (manifest.json, sw.js, icons, etc.).
-    "/((?!api|_next/static|_next/image|favicon.ico|manifest.json|sw.js|icons|icon-).*)",
+    // Exclude API, Next internals and all common static asset file extensions
+    // so public files (manifest.json, sw.js, PNG/SVG icons, favicons, etc.)
+    // are fetched directly and not intercepted by this middleware.
+    "/((?!api|_next/static|_next/image|favicon.ico|manifest.json|sw.js|icons|.*\\.(?:png|jpg|jpeg|svg|ico|webp|json)).*)",
   ],
 };
