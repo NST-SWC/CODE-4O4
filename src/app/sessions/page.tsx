@@ -199,7 +199,7 @@ const SessionsPage = () => {
           </thead>
           <tbody>
             {(sessions.length > 0 ? sessions : staticSessionModules).map((item) => {
-              const topics = Array.isArray(item.topics) && item.topics.length > 0
+              const topics: string[] = Array.isArray(item.topics) && item.topics.length > 0
                 ? item.topics
                 : item.description
                   ? [item.description]
