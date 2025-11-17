@@ -25,6 +25,7 @@ type NotificationBellProps = {
 
 const STORAGE_KEY = "code404-local-notifications";
 const MAX_NOTIFICATIONS = 40;
+const SYNC_INTERVAL_MS = 5 * 60 * 1000; // fetch at most once every 5 minutes
 
 const formatRelativeTime = (iso: string | null) => {
   if (!iso) return "";
@@ -71,6 +72,7 @@ export default function NotificationBell({
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [syncing, setSyncing] = useState(false);
+  const [serverSyncing, setServerSyncing] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [marking, setMarking] = useState(false);
   const anchorRef = useRef<HTMLButtonElement | null>(null);
@@ -100,6 +102,37 @@ export default function NotificationBell({
       persistToStorage(storageKey, items);
     },
     [storageKey],
+  );
+
+  const lastServerSyncKey = useMemo(() => `${storageKey}:last-sync`, [storageKey]);
+
+  const syncFromServer = useCallback(
+    async (force = false) => {
+      if (!user?.id) return;
+      if (typeof window === "undefined") return;
+      const now = Date.now();
+      const lastSync = Number(window.localStorage.getItem(lastServerSyncKey) || 0);
+      if (!force && now - lastSync < SYNC_INTERVAL_MS) {
+        return;
+      }
+      setServerSyncing(true);
+      try {
+        const res = await fetch(`/api/notifications?userId=${user.id}&limit=20`, {
+          cache: "no-store",
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Unable to sync notifications");
+        }
+        persistNotifications(data.data || []);
+        window.localStorage.setItem(lastServerSyncKey, String(now));
+      } catch (err) {
+        console.warn("Notification sync failed", err);
+      } finally {
+        setServerSyncing(false);
+      }
+    },
+    [user?.id, persistNotifications, lastServerSyncKey],
   );
 
   const addIncomingNotification = useCallback(
@@ -148,6 +181,17 @@ export default function NotificationBell({
       navigator.serviceWorker?.removeEventListener("message", swListener as any);
     };
   }, [storageKey, addIncomingNotification]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    syncFromServer(true);
+  }, [user?.id, syncFromServer]);
+
+  useEffect(() => {
+    if (open && user?.id) {
+      syncFromServer();
+    }
+  }, [open, syncFromServer, user?.id]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -282,18 +326,34 @@ export default function NotificationBell({
                 <p className="text-lg font-semibold text-white">Notifications</p>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={reloadFromStorage}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-white/70 hover:text-white"
-                  aria-label="Reload notifications"
-                >
-                  {syncing ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <RefreshCw className="h-4 w-4" />
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={reloadFromStorage}
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-white/70 hover:text-white"
+                    aria-label="Reload from device cache"
+                  >
+                    {syncing ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4" />
+                    )}
+                  </button>
+                  {user && (
+                    <button
+                      type="button"
+                      onClick={() => syncFromServer(true)}
+                      className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-white/70 hover:text-white"
+                      aria-label="Sync from server"
+                    >
+                      {serverSyncing ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <span className="text-xs font-semibold">↺</span>
+                      )}
+                    </button>
                   )}
-                </button>
+                </div>
                 <button
                   type="button"
                   onClick={markAllRead}
