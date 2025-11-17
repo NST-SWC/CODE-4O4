@@ -233,30 +233,56 @@ export default function NotificationBell({
     setOpen((prev) => !prev);
   };
 
-  const markAllRead = () => {
+  const patchServerReadState = useCallback(
+    async (payload: { markAllAsRead?: boolean; notificationIds?: string[] }) => {
+      if (!user?.id) return true;
+      try {
+        const res = await fetch("/api/notifications", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user.id, ...payload }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Unable to update notifications");
+        }
+        window.localStorage.setItem(lastServerSyncKey, String(Date.now()));
+        return true;
+      } catch (err) {
+        console.warn("Failed to update notification read state", err);
+        return false;
+      }
+    },
+    [user?.id, lastServerSyncKey],
+  );
+
+  const markAllRead = async () => {
     if (unreadCount === 0) return;
     setMarking(true);
-    setTimeout(() => {
-      persistNotifications(
-        notifications.map((item) => ({
-          ...item,
-          read: true,
-        })),
-      );
-      setMarking(false);
-    }, 120);
+    const nextItems = notifications.map((item) => ({ ...item, read: true }));
+    persistNotifications(nextItems);
+    const success = await patchServerReadState({ markAllAsRead: true });
+    if (!success) {
+      // reload previous state from storage if server update fails
+      setNotifications(readFromStorage(storageKey));
+    }
+    setMarking(false);
   };
 
-  const markNotificationRead = (notification: NotificationItem) => {
+  const markNotificationRead = async (notification: NotificationItem) => {
     if (notification.read) return;
     const next = notifications.map((item) =>
       item.id === notification.id ? { ...item, read: true } : item,
     );
     persistNotifications(next);
+    const success = await patchServerReadState({ notificationIds: [notification.id] });
+    if (!success) {
+      setNotifications(readFromStorage(storageKey));
+    }
   };
 
-  const handleNotificationClick = (notification: NotificationItem) => {
-    markNotificationRead(notification);
+  const handleNotificationClick = async (notification: NotificationItem) => {
+    await markNotificationRead(notification);
     setOpen(false);
     if (notification.url) {
       router.push(notification.url);
