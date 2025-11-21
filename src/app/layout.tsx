@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import SwRegister from "@/components/sw-register";
 import { AuthProvider } from "@/context/auth-context";
+import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
   title: "CODE 4O4 · Build, Learn, Grow",
