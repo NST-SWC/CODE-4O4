@@ -13,7 +13,8 @@
     "test:notifications": "node scripts/test-notifications.js",
     "notify": "node scripts/send-test-notification.js",
     "check:tokens": "node scripts/check-fcm-tokens.js",
-    "monitor:usage": "node scripts/monitor-usage.js"
+    "monitor:usage": "node scripts/monitor-usage.js",
+    "slack:send": "node scripts/send-slack-message.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

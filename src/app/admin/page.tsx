@@ -262,10 +262,16 @@ const AdminPage = () => {
       actions={
         <div className="flex gap-3">
           <Link
+            href="/admin/slack"
+            className="rounded-full border border-sky-400/40 bg-sky-400/10 px-5 py-2 text-sm text-sky-200 transition hover:border-sky-300 hover:bg-sky-400/20"
+          >
+            📣 Slack Announcement
+          </Link>
+          <Link
             href="/admin/webpush"
             className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-5 py-2 text-sm text-emerald-400 transition hover:border-emerald-400 hover:bg-emerald-500/20"
           >
-            � Send Notification
+            🔔 Send Notification
           </Link>
           <Link
             href="/"
