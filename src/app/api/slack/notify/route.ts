@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isSlackConfigured, postSlackMessage } from "@/lib/server/slack";
+import { isSlackConfigured, postSlackMessage, postSlackMessages } from "@/lib/server/slack";
 
 export const runtime = "nodejs";
 
@@ -9,6 +9,7 @@ type SlackNotifyRequest = {
   body?: string;
   url?: string;
   channel?: string;
+  channels?: string[];
   blocks?: any[];
   ping?: "here" | "channel";
   thread_ts?: string;
@@ -62,7 +63,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { text, title, body, url, channel, blocks, ping, thread_ts } = payload || {};
+  const { text, title, body, url, channel, channels, blocks, ping, thread_ts } = payload || {};
+
+  const normalizedChannels = [
+    ...(typeof channel === "string" ? [channel] : []),
+    ...(Array.isArray(channels) ? channels : []),
+  ]
+    .map((ch) => (typeof ch === "string" ? ch.trim() : ""))
+    .filter(Boolean);
+
+  const targetChannels = Array.from(new Set(normalizedChannels));
 
   const hasContent = Boolean(text || title || body || (Array.isArray(blocks) && blocks.length > 0));
   if (!hasContent) {
@@ -106,18 +116,29 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const response = await postSlackMessage({
+    const messagePayload = {
       text: fallbackText,
       blocks: messageBlocks,
-      channel,
       thread_ts,
-    });
+    };
+
+    const results =
+      targetChannels.length > 0
+        ? await postSlackMessages({ ...messagePayload, channels: targetChannels })
+        : [await postSlackMessage(messagePayload)];
+
+    const primary = results[0];
 
     return NextResponse.json({
       ok: true,
-      channel: response.channel,
-      ts: response.ts,
-      method: response.method || "bot",
+      channel: primary?.channel,
+      ts: primary?.ts,
+      method: primary?.method || "bot",
+      results: results.map((result) => ({
+        channel: result.channel,
+        ts: result.ts,
+        method: result.method || "bot",
+      })),
     });
   } catch (error: any) {
     console.error("Failed to send Slack notification:", error);

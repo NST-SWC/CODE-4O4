@@ -13,7 +13,9 @@ require("dotenv").config({ path: ".env.local" });
 const args = process.argv.slice(2);
 
 function printUsage() {
-  console.log("Usage: node scripts/send-slack-message.js \"Your message\" [--url https://link] [--ping here|channel] [--channel C123]");
+  console.log(
+    "Usage: node scripts/send-slack-message.js \"Your message\" [--url https://link] [--ping here|channel] [--channel C123] [--channels C123,C456]",
+  );
   console.log("Uses SLACK_WEBHOOK_URL when set, otherwise SLACK_BOT_TOKEN + SLACK_DEVCLUB_CHANNEL_ID");
 }
 
@@ -24,6 +26,7 @@ if (!args.length) {
 
 let url;
 let channel;
+let channels = [];
 let ping;
 const messageParts = [];
 
@@ -36,6 +39,14 @@ for (let i = 0; i < args.length; i++) {
   }
   if (arg === "--channel") {
     channel = args[i + 1];
+    i += 1;
+    continue;
+  }
+  if (arg === "--channels") {
+    channels = (args[i + 1] || "")
+      .split(",")
+      .map((ch) => ch.trim())
+      .filter(Boolean);
     i += 1;
     continue;
   }
@@ -78,19 +89,31 @@ async function send() {
   }
 
   const webhook = process.env.SLACK_WEBHOOK_URL;
+  const targetChannels = channels.length ? channels : channel ? [channel] : [];
+  const uniqueTargets = Array.from(new Set(targetChannels));
+
   if (webhook) {
-    const body = { text: `${mentionPrefix}${text}`, blocks };
-    if (channel) body.channel = channel;
-    const res = await fetch(webhook, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      const msg = await res.text();
-      throw new Error(msg || "Slack webhook error");
+    const targetsToSend = uniqueTargets.length ? uniqueTargets : [null];
+
+    for (const target of targetsToSend) {
+      const body = { text: `${mentionPrefix}${text}`, blocks };
+      if (target) body.channel = target;
+
+      const res = await fetch(webhook, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg || "Slack webhook error");
+      }
     }
-    console.log("✅ Sent via webhook");
+
+    console.log(
+      `✅ Sent via webhook${targetsToSend.length > 1 ? ` to ${targetsToSend.length} channels` : ""}`,
+    );
     return;
   }
 
@@ -102,33 +125,48 @@ async function send() {
     process.exit(1);
   }
 
-  const targetChannel = channel || defaultChannel;
-  if (!targetChannel) {
+  const botTargets = uniqueTargets.length
+    ? uniqueTargets
+    : defaultChannel
+      ? [defaultChannel]
+      : [];
+
+  if (!botTargets.length) {
     console.error("❌ No channel provided and SLACK_DEVCLUB_CHANNEL_ID is missing.");
     process.exit(1);
   }
 
-  const res = await fetch("https://slack.com/api/chat.postMessage", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json; charset=utf-8",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      channel: targetChannel,
-      text: `${mentionPrefix}${text}`,
-      blocks,
-      unfurl_links: true,
-      unfurl_media: false,
-    }),
-  });
+  const results = [];
 
-  const data = await res.json();
-  if (!data.ok) {
-    throw new Error(data.error || "Slack API error");
+  for (const target of botTargets) {
+    const res = await fetch("https://slack.com/api/chat.postMessage", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        channel: target,
+        text: `${mentionPrefix}${text}`,
+        blocks,
+        unfurl_links: true,
+        unfurl_media: false,
+      }),
+    });
+
+    const data = await res.json();
+    if (!data.ok) {
+      throw new Error(data.error || "Slack API error");
+    }
+
+    results.push({ channel: data.channel, ts: data.ts });
   }
 
-  console.log(`✅ Sent to ${data.channel} (ts: ${data.ts})`);
+  const summary = results
+    .map((result) => `${result.channel}${result.ts ? ` (ts: ${result.ts})` : ""}`)
+    .join(", ");
+
+  console.log(`✅ Sent to ${summary}`);
 }
 
 send().catch((err) => {

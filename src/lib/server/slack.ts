@@ -17,6 +17,10 @@ export type SlackPostResult = {
   method?: "bot" | "webhook";
 };
 
+export type SlackMultiChannelPayload = SlackMessagePayload & {
+  channels?: string[];
+};
+
 export function isSlackConfigured(): boolean {
   return Boolean(
     process.env.SLACK_WEBHOOK_URL ||
@@ -91,7 +95,7 @@ async function sendViaBotToken(payload: SlackMessagePayload): Promise<SlackPostR
   return { ...data, method: "bot" };
 }
 
-export async function postSlackMessage(payload: SlackMessagePayload): Promise<SlackPostResult> {
+async function deliverSlackMessage(payload: SlackMessagePayload): Promise<SlackPostResult> {
   const webhook = process.env.SLACK_WEBHOOK_URL;
   if (webhook) {
     try {
@@ -106,4 +110,35 @@ export async function postSlackMessage(payload: SlackMessagePayload): Promise<Sl
   }
 
   return sendViaBotToken(payload);
+}
+
+export async function postSlackMessage(payload: SlackMessagePayload): Promise<SlackPostResult> {
+  return deliverSlackMessage(payload);
+}
+
+export async function postSlackMessages(
+  payload: SlackMultiChannelPayload,
+): Promise<SlackPostResult[]> {
+  const { channels, channel, ...rest } = payload;
+
+  const normalizedTargets = [
+    ...(channel ? [channel] : []),
+    ...(Array.isArray(channels) ? channels : []),
+  ]
+    .map((ch) => ch.trim())
+    .filter(Boolean);
+
+  const targets = Array.from(new Set(normalizedTargets));
+
+  if (targets.length === 0) {
+    return [await deliverSlackMessage(rest as SlackMessagePayload)];
+  }
+
+  const results: SlackPostResult[] = [];
+
+  for (const target of targets) {
+    results.push(await deliverSlackMessage({ ...(rest as SlackMessagePayload), channel: target }));
+  }
+
+  return results;
 }

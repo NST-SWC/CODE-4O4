@@ -66,12 +66,24 @@ curl -X POST http://localhost:3000/api/slack/notify \
         "ping": "here"
       }'
 ```
-Payload fields: `text` (raw), or `title`/`body` + optional `url`, `ping` (`here` or `channel`), `channel` override, and `blocks` if you want to fully control the Slack layout.
+Payload fields: `text` (raw), or `title`/`body` + optional `url`, `ping` (`here` or `channel`), `channel` override (or `channels` array to fan out to multiple IDs), and `blocks` if you want to fully control the Slack layout.
+To target two channels in one call:
+
+```bash
+curl -X POST http://localhost:3000/api/slack/notify \
+  -H "Content-Type: application/json" \
+  -H "x-slack-secret: $SLACK_SEND_SECRET" \
+  -d '{
+        "title": "New Event Published",
+        "body": "AI Hackathon kicks off Friday 5pm.",
+        "channels": ["C01234567", "C09988765"]
+      }'
+```
 
 ### 4) CLI smoke test
 Send a quick message without running the Next.js server:
 ```bash
-npm run slack:send -- "Hello from Dev Club bot" --url https://devclub.example.com --ping here
+npm run slack:send -- "Hello from Dev Club bot" --url https://devclub.example.com --ping here --channels C01234567,C09988765
 ```
 This uses `scripts/send-slack-message.js` and will prefer `SLACK_WEBHOOK_URL` if set; otherwise it falls back to the bot token.
 

@@ -28,16 +28,28 @@ export default function AdminSlackPage() {
     setSending(true);
     setResult(null);
     try {
+      const parsedChannels = channel
+        .split(",")
+        .map((ch) => ch.trim())
+        .filter(Boolean);
+
+      const payload: Record<string, any> = {
+        title: title.trim(),
+        body: body.trim(),
+        url: url.trim() || undefined,
+        ping: ping || undefined,
+      };
+
+      if (parsedChannels.length === 1) {
+        payload.channel = parsedChannels[0];
+      } else if (parsedChannels.length > 1) {
+        payload.channels = parsedChannels;
+      }
+
       const res = await fetch("/api/slack/notify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: title.trim(),
-          body: body.trim(),
-          url: url.trim() || undefined,
-          ping: ping || undefined,
-          channel: channel.trim() || undefined,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -45,7 +57,13 @@ export default function AdminSlackPage() {
         throw new Error(data.error || "Failed to send");
       }
 
-      setResult(`✅ Sent to #${data.channel || "dev-club"} (ts: ${data.ts || "pending"})`);
+      const destinations = Array.isArray(data.results) && data.results.length > 0
+        ? data.results
+            .map((r: any) => `#${r.channel || "dev-club"}`)
+            .join(", ")
+        : `#${data.channel || "dev-club"}`;
+
+      setResult(`✅ Sent to ${destinations}`);
     } catch (error: any) {
       setResult(`❌ ${error.message || "Unable to send Slack message"}`);
     } finally {
@@ -130,7 +148,7 @@ export default function AdminSlackPage() {
                 className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-emerald-400/60 focus:outline-none"
                 value={channel}
                 onChange={(e) => setChannel(e.target.value)}
-                placeholder="Leave blank to use default dev-club channel"
+                placeholder="Comma separated channel IDs, blank uses default"
               />
             </div>
           </div>
@@ -177,7 +195,7 @@ export default function AdminSlackPage() {
                 <ul className="mt-1 space-y-1 text-xs text-emerald-100/80">
                   <li>• Use <code>@here</code> for time-sensitive updates, <code>@channel</code> for major announcements.</li>
                   <li>• Add a URL so Slack renders a button and deep-links into the portal.</li>
-                  <li>• Leave Channel override empty to use the default Dev Club channel.</li>
+                  <li>• Leave Channels empty to use the default Dev Club channel; provide multiple IDs comma-separated to fan out.</li>
                 </ul>
               </div>
               <div>
