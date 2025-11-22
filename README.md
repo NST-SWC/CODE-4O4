@@ -52,6 +52,7 @@ Replace these with your own authentication mechanism (or connect to Firebase Aut
 ### 🔔 Slack Bot (Dev Club channel)
 - Follow [SLACK_SETUP.md](./SLACK_SETUP.md) to configure either a webhook (`SLACK_WEBHOOK_URL`) or bot token (`SLACK_BOT_TOKEN` + channel ID) in `.env.local`.
 - Post messages via `POST /api/slack/notify` (guarded by `x-slack-secret`) or from the CLI with `npm run slack:send -- \"Hello\" --url https://devclub.example.com --ping here`. The system prefers the webhook when set, falling back to the bot token.
+- If Slack shows “app not configured to handle interactive responses,” enable Interactivity in Slack and point the Request URL to `/api/slack/interactive` (see SLACK_SETUP.md).
 
 Without valid credentials, all Firebase-powered actions remain in **preview mode** (requests resolve locally so you can demo the flow without writes).
 

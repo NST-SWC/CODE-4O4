@@ -47,6 +47,12 @@ SLACK_SEND_SECRET=choose-a-random-string
 - `SLACK_SEND_SECRET` protects the API endpoint; include it as the `x-slack-secret` header when calling.
 - Restart `npm run dev` after updating env vars.
 
+### 2.1) Configure Slack interactivity (fixes “This app is not configured to handle interactive responses”)
+- In your Slack app, go to **Features → Interactivity & Shortcuts**.
+- Toggle **Interactivity** on.
+- Set **Request URL** to `https://your-app-domain.com/api/slack/interactive` (use `http://localhost:3000/api/slack/interactive` locally).
+- Save.
+
 ### 3) API endpoint for app-triggered posts
 Send structured messages from the app or external jobs:
 ```bash
