@@ -92,9 +92,9 @@ const isWhitelisted = (member) => {
 };
 
 const buildEmail = (member) => ({
-  from: `"CODE 4O4" <${smtpUser}>`,
+  from: `"DevForge" <${smtpUser}>`,
   to: member.email,
-  subject: "Update from CODE 4O4 Dev Club",
+  subject: "Update from DevForge",
   html: `
   <!DOCTYPE html>
   <html>
@@ -125,19 +125,19 @@ const buildEmail = (member) => ({
         <div class="card">
           <p class="title">Hi ${member.name || "there"},</p>
           <p class="section">
-            We’re pausing your access to the CODE 4O4 Dev Club for now because we haven’t seen recent activity.
+            We're pausing your access to the DevForge club for now because we haven't seen recent activity.
             To keep the squad focused, inactive members are cycled out.
           </p>
           <p class="section">
-            Still want in? Show your interest when the next recruitment window opens and we’ll be excited to see you back.
+            Still want in? Show your interest when the next recruitment window opens and we'll be excited to see you back.
           </p>
           <div class="note">
-            If you believe this was an error, reply to this email and we’ll review it quickly.
+            If you believe this was an error, reply to this email and we'll review it quickly.
           </div>
-          <a class="cta" href="https://code404.dev">Visit CODE 4O4</a>
+          <a class="cta" href="https://devforge.dev">Visit DevForge</a>
         </div>
         <div class="footer">
-          CODE 4O4 · Bengaluru<br />
+          DevForge · Bengaluru<br />
           Building together, one release at a time.
         </div>
       </div>

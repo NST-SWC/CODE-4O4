@@ -2,44 +2,45 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import SwRegister from "@/components/sw-register";
 import { AuthProvider } from "@/context/auth-context";
+import LenisProvider from "@/components/lenis-provider";
 
 export const metadata: Metadata = {
-  title: "CODE 4O4 · Build, Learn, Grow",
+  title: "DevForge · Build, Learn, Grow",
   description:
     "An immersive developer experience powered by Firebase, collaborative projects, live events, and a gamified member portal.",
-  metadataBase: new URL("https://code404.preview"),
+  metadataBase: new URL("https://devforge.preview"),
   manifest: "/manifest.json",
   icons: {
     icon: [
-      { url: "/icon-192x192.svg", type: "image/svg+xml", sizes: "192x192" },
-      { url: "/icon-512x512.svg", type: "image/svg+xml", sizes: "512x512" },
+      { url: "/app-icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/app-icon-512.png", type: "image/png", sizes: "512x512" },
     ],
     apple: [
-      { url: "/icon-192x192.svg", sizes: "192x192", type: "image/svg+xml" },
+      { url: "/apple-touch-icon-180.png", sizes: "180x180", type: "image/png" },
     ],
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "CODE 4O4",
+    title: "DevForge",
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
     type: "website",
-    siteName: "CODE 4O4",
-    title: "CODE 4O4 · Build, Learn, Grow",
+    siteName: "DevForge",
+    title: "DevForge · Build, Learn, Grow",
     description:
-      "Build, Learn, and Grow with CODE 4O4",
-    images: [{ url: "/icon-512x512.svg", width: 512, height: 512 }],
+      "Build, Learn, and Grow with DevForge",
+    images: [{ url: "/app-icon-512.png", width: 512, height: 512 }],
   },
   twitter: {
     card: "summary",
-    title: "CODE 4O4",
+    title: "DevForge",
     description:
-      "Build, Learn, and Grow with CODE 4O4",
-    images: ["/icon-512x512.svg"],
+      "Build, Learn, and Grow with DevForge",
+    images: ["/app-icon-512.png"],
   },
 };
 
@@ -65,7 +66,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="CODE 4O4" />
+        <meta name="apple-mobile-web-app-title" content="DevForge" />
         {/* Make manifest & icons explicit to help installability checks */}
         <link rel="manifest" href="/manifest.json" />
         {/* apple-touch-icon should point to the PNG you added for best iOS support */}

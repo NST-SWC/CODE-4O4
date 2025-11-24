@@ -71,7 +71,7 @@ async function generateFromSource(source) {
 }
 
 function generateSVGPlaceholder() {
-  const generateSVG = (size) => `<?xml version="1.0" encoding="UTF-8"?>\n<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">\n  <rect width="${size}" height="${size}" fill="#111"/>\n  <text x="50%" y="50%" font-family="system-ui, -apple-system, sans-serif" font-size="${Math.round(size * 0.18)}" fill="#ff7a00" text-anchor="middle" dominant-baseline="middle">CODE 4O4</text>\n</svg>`;
+  const generateSVG = (size) => `<?xml version="1.0" encoding="UTF-8"?>\n<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">\n  <defs>\n    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">\n      <stop offset="0%" stop-color="#0ea5e9"/>\n      <stop offset="100%" stop-color="#22d3ee"/>\n    </linearGradient>\n  </defs>\n  <rect width="${size}" height="${size}" fill="url(#grad)" rx="${Math.round(size * 0.18)}"/>\n  <text x="50%" y="46%" font-family="system-ui, -apple-system, sans-serif" font-size="${Math.round(size * 0.24)}" font-weight="700" fill="#0b1220" text-anchor="middle" dominant-baseline="middle">DEV</text>\n  <text x="50%" y="70%" font-family="system-ui, -apple-system, sans-serif" font-size="${Math.round(size * 0.2)}" font-weight="700" fill="#0b1220" text-anchor="middle" dominant-baseline="middle">FORGE</text>\n</svg>`;
 
   if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true });
 

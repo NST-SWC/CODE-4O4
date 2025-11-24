@@ -77,122 +77,152 @@ const SessionsPage = () => {
   };
 
   return (
-  <PageContainer>
-    <PageIntro
-      badge="CLUB SESSIONS"
-      title="Wednesday & Friday build nights"
-      description="Live workshops start 12 November. We meet twice a week to cover HTML, CSS, and front-end fundamentals before jumping into collaborative projects."
-      actions={
-        <div className="flex gap-3">
-          {canManageSessions && (
-            <Link
-              href="/admin/sessions"
-              className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-5 py-2 text-sm text-cyan-400 transition hover:border-cyan-400 hover:bg-cyan-500/20"
-            >
-              Manage Sessions
-            </Link>
-          )}
+    <PageContainer>
+      <PageIntro
+        badge="CLUB CALENDAR"
+        title="DevForge Club Calendar"
+        description="All upcoming events, workshops, and rituals for the club."
+        actions={
           <Link
             href="/events"
             className="rounded-full border border-white/10 px-5 py-2 text-sm text-white/70 transition hover:border-emerald-300/60 hover:text-white"
           >
             View events
           </Link>
-        </div>
-      }
-    />
+        }
+      />
 
-    <section className="mt-10 space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">Upcoming calendar</h2>
-        <p className="text-xs text-white/60">
-          {refreshing
-            ? "Refreshing…"
-            : lastUpdated
-              ? `Updated ${getRelativeTime(lastUpdated)}`
-              : "Auto-refresh enabled"}
-        </p>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        {loading ? (
-          <div className="col-span-full text-center text-white/60 py-12">Loading sessions...</div>
-        ) : sessions.length === 0 ? (
-          <div className="col-span-full text-center text-white/60 py-12">No upcoming sessions</div>
-        ) : (
-          sessions.map((session) => (
-            <article
-              key={session.id}
-              className="rounded-3xl border border-white/10 bg-white/5 p-6"
-            >
-              <div className="flex flex-wrap items-center justify-between text-xs uppercase tracking-[0.3em] text-white/60">
-                <span>{session.type}</span>
-                <span className="flex items-center gap-2">
-                  {formatDate(session.date, { weekday: "long" })}
-                  {getSessionBadge(session.date) && (
-                    <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[0.6rem] font-semibold tracking-wide text-white/80">
-                      {getSessionBadge(session.date)}
-                    </span>
-                  )}
-                </span>
-              </div>
-              <h3 className="mt-2 text-xl font-semibold">{session.title}</h3>
-              <p className="text-sm text-white/70">{session.description || session.focus || 'Workshop session'}</p>
-              <p className="mt-4 text-xs text-white/50">
-                Starts {formatDate(session.date, { month: "long", day: "numeric" })}
-              </p>
-            </article>
-          ))
-        )}
-      </div>
-    </section>
-
-    {sessions.length > 0 && (
-      <section className="mt-12 space-y-6">
-        <h2 className="text-2xl font-semibold">Session breakdown</h2>
-        <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5">
-          <table className="w-full border-collapse text-left text-sm text-white/80">
-            <thead className="bg-white/5 text-xs uppercase tracking-[0.3em] text-white/60">
-              <tr>
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3">Module</th>
-                <th className="px-4 py-3">Topics</th>
+      <section className="mt-10">
+        <h2 className="text-2xl font-semibold">Club Calendar</h2>
+        <div className="mt-6 overflow-x-auto">
+          <table className="min-w-full text-sm text-left border border-white/10 rounded-2xl bg-gradient-to-br from-black/40 to-slate-900/60 shadow-lg">
+            <thead>
+              <tr className="bg-black/60">
+                <th className="px-6 py-3 text-cyan-300 font-semibold">Date</th>
+                <th className="px-6 py-3 text-cyan-300 font-semibold">Day</th>
+                <th className="px-6 py-3 text-cyan-300 font-semibold">Event</th>
               </tr>
             </thead>
             <tbody>
-              {sessions.map((item) => {
-                const topics: string[] = Array.isArray(item.topics) && item.topics.length > 0
-                  ? item.topics
-                  : item.description
-                    ? [item.description]
-                    : ["Live workshop"];
-                const weekdayLabel = item.weekday || formatDate(item.date, { weekday: "long" });
-                return (
-                  <tr
-                    key={item.id || `${item.title}-${item.date}`}
-                    className="border-t border-white/10 [&:nth-child(even)]:bg-white/3"
-                  >
-                    <td className="px-4 py-4 align-top text-white/60">
-                      {formatDate(item.date, { month: "short", day: "numeric" })}
-                      <br />
-                      <span className="text-xs">{weekdayLabel}</span>
-                    </td>
-                    <td className="px-4 py-4 align-top font-semibold">{item.title}</td>
-                    <td className="px-4 py-4">
-                      <ul className="list-disc pl-5 text-white/70">
-                        {topics.map((topic) => (
-                          <li key={topic}>{topic}</li>
-                        ))}
-                      </ul>
-                    </td>
-                  </tr>
-                );
-              })}
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">24 Nov</td><td className="px-6 py-3">Mon</td><td className="px-6 py-3">Opening Club Meet + Announcements</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">25 Nov</td><td className="px-6 py-3">Tue</td><td className="px-6 py-3">Tech Tips Tuesday</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">26 Nov</td><td className="px-6 py-3">Wed</td><td className="px-6 py-3">Kickoff: Start 100DaysOfInteresting</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">27 Nov</td><td className="px-6 py-3">Thu</td><td className="px-6 py-3">Lightning Talk Planning + Club Meet</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">28 Nov</td><td className="px-6 py-3">Fri</td><td className="px-6 py-3">Code Debugging Challenge</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">29 Nov</td><td className="px-6 py-3">Sat</td><td className="px-6 py-3">First Newsletter Release</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">30 Nov</td><td className="px-6 py-3">Sun</td><td className="px-6 py-3">Saturday Event (Main Event)</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">1 Dec</td><td className="px-6 py-3">Mon</td><td className="px-6 py-3">Review Week + Plan December</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">2 Dec</td><td className="px-6 py-3">Tue</td><td className="px-6 py-3">Tech Tips Tuesday</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">3 Dec</td><td className="px-6 py-3">Wed</td><td className="px-6 py-3">Share Interesting Link</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">4 Dec</td><td className="px-6 py-3">Thu</td><td className="px-6 py-3">Lightning Talk #1</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">5 Dec</td><td className="px-6 py-3">Fri</td><td className="px-6 py-3">Mini Frontend Layout Challenge</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">6 Dec</td><td className="px-6 py-3">Sat</td><td className="px-6 py-3">Workshop / Group Coding Session</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">7 Dec</td><td className="px-6 py-3">Sun</td><td className="px-6 py-3">Mini Event / Project Work Day</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">8 Dec</td><td className="px-6 py-3">Mon</td><td className="px-6 py-3">Weekly Review + Newsletter Content</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">9 Dec</td><td className="px-6 py-3">Tue</td><td className="px-6 py-3">Tech Tips Tuesday</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">10 Dec</td><td className="px-6 py-3">Wed</td><td className="px-6 py-3">Code Puzzle Day (JS/BugFix Games)</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">11 Dec</td><td className="px-6 py-3">Thu</td><td className="px-6 py-3">Lightning Talk #2</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">12 Dec</td><td className="px-6 py-3">Fri</td><td className="px-6 py-3">CSS Battle / UI Challenge</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">13 Dec</td><td className="px-6 py-3">Sat</td><td className="px-6 py-3">Code-Along / Debug Night</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">14 Dec</td><td className="px-6 py-3">Sun</td><td className="px-6 py-3">Club Project Sprint #1</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">15 Dec</td><td className="px-6 py-3">Mon</td><td className="px-6 py-3">Weekly Review</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">16 Dec</td><td className="px-6 py-3">Tue</td><td className="px-6 py-3">Tech Tips Tuesday</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">17 Dec</td><td className="px-6 py-3">Wed</td><td className="px-6 py-3">Mini Build Challenge (30-Minute Build)</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">18 Dec</td><td className="px-6 py-3">Thu</td><td className="px-6 py-3">Lightning Talk #3</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">19 Dec</td><td className="px-6 py-3">Fri</td><td className="px-6 py-3">Meme & Chill Coding Session</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">20 Dec</td><td className="px-6 py-3">Sat</td><td className="px-6 py-3">Mini Workshop</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">21 Dec</td><td className="px-6 py-3">Sun</td><td className="px-6 py-3">Club Project Sprint #2</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">22 Dec</td><td className="px-6 py-3">Mon</td><td className="px-6 py-3">Weekly Review + Newsletter</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">23 Dec</td><td className="px-6 py-3">Tue</td><td className="px-6 py-3">Tech Tips Tuesday</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">24 Dec</td><td className="px-6 py-3">Wed</td><td className="px-6 py-3">Code Golf Challenge (Shortest Code Wins)</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">25 Dec</td><td className="px-6 py-3">Thu</td><td className="px-6 py-3">Christmas Break / Meme Day</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">26 Dec</td><td className="px-6 py-3">Fri</td><td className="px-6 py-3">Minecraft Multiplayer Build Contest</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">27 Dec</td><td className="px-6 py-3">Sat</td><td className="px-6 py-3">Lightning Talk #4</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">28 Dec</td><td className="px-6 py-3">Sun</td><td className="px-6 py-3">End-of-Year Meet + Project Update</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">29 Dec</td><td className="px-6 py-3">Mon</td><td className="px-6 py-3">Newsletter Release</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">30 Dec</td><td className="px-6 py-3">Tue</td><td className="px-6 py-3">Game Night (Skribbl / Code Games)</td>
+              </tr>
+              <tr className="border-b border-white/10 hover:bg-black/30 transition">
+                <td className="px-6 py-3">31 Dec</td><td className="px-6 py-3">Wed</td><td className="px-6 py-3">New Year Reflection Post</td>
+              </tr>
             </tbody>
           </table>
         </div>
       </section>
-    )}
-  </PageContainer>
+    </PageContainer>
   );
 };
 

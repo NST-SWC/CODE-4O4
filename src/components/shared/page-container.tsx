@@ -31,7 +31,7 @@ export const PageContainer = ({ children }: { children: ReactNode }) => {
               href="/"
               className="text-xs font-semibold uppercase tracking-[0.4em] text-white/70 transition hover:text-cyan-400"
             >
-              CODE 4O4
+              DevForge
             </Link>
             <nav className="flex flex-wrap items-center gap-2 text-sm text-white/70">
               {guestLinks.map((link) => (

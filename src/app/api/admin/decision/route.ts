@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
           // Send approval notification
           if (memberData?.fcmTokens && memberData.fcmTokens.length > 0) {
             const messaging = getMessaging();
-            const notificationTitle = "Welcome to CODE 4O4! 🎉";
+            const notificationTitle = "Welcome to DevForge! 🎉";
             const notificationBody = "Your membership has been approved. Welcome to the team!";
             
             for (const token of memberData.fcmTokens) {

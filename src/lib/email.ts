@@ -46,9 +46,9 @@ export async function sendCredentialsEmail({
     console.log(`✅ [Email Service] Transporter created`);
 
     const mailOptions = {
-      from: `"CODE 4O4" <${process.env.SMTP_USER}>`,
+      from: `"DevForge" <${process.env.SMTP_USER}>`,
       to,
-      subject: "🎉 Welcome to CODE 4O4 - Your Login Credentials",
+      subject: "🎉 Welcome to DevForge - Your Login Credentials",
       html: `
         <!DOCTYPE html>
         <html>
@@ -126,7 +126,7 @@ export async function sendCredentialsEmail({
         </head>
         <body>
           <div class="header">
-            <h1>🎉 Welcome to CODE 4O4!</h1>
+            <h1>🎉 Welcome to DevForge!</h1>
           </div>
           <div class="content">
             <p>Hi <strong>${name}</strong>,</p>
@@ -171,19 +171,19 @@ export async function sendCredentialsEmail({
             
             <p style="margin-top: 30px;">
               Best regards,<br>
-              <strong>CODE 4O4 Team</strong>
+              <strong>DevForge Team</strong>
             </p>
           </div>
           
           <div class="footer">
             <p>This is an automated email. Please do not reply to this message.</p>
-            <p>&copy; ${new Date().getFullYear()} CODE 4O4. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} DevForge. All rights reserved.</p>
           </div>
         </body>
         </html>
       `,
       text: `
-Welcome to CODE 4O4 Dev Club!
+Welcome to DevForge Dev Club!
 
 Hi ${name},
 
@@ -198,7 +198,7 @@ Login at: ${process.env.NEXT_PUBLIC_APP_URL || "https://website-drab-ten-27.verc
 Please keep your credentials secure and change your password after your first login.
 
 Best regards,
-CODE 4O4 Team
+DevForge Team
       `,
     };
 

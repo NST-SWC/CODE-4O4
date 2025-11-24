@@ -75,7 +75,7 @@ async function testNotifications() {
     const message = {
       notification: {
         title: '🧪 Test Notification',
-    body: 'This is a test notification from CODE 4O4',
+    body: 'This is a test notification from DevForge',
       },
       data: {
         url: '/dashboard',

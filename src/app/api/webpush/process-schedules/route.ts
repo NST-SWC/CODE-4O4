@@ -92,7 +92,7 @@ export async function POST(req: Request) {
           const writes = Array.from(userIds).map((userId) =>
             db.collection('notifications').add({
               userId,
-              title: payload.title || 'CODE 4O4',
+              title: payload.title || 'DevForge',
               body: payload.body || '',
               icon: payload.icon || '/icon-192x192.png',
               url: payload.data?.url || payload.url || '/',

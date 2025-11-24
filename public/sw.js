@@ -17,7 +17,7 @@ self.addEventListener('push', (event) => {
   try {
     const payload = event.data ? event.data.json() : {};
     // Provide a friendly default title
-    const title = payload.title || 'CODE 4O4';
+    const title = payload.title || 'DevForge';
 
     // NotificationOptions supported keys: body, icon, badge, image, vibrate, actions, tag, renotify, requireInteraction, silent, data
     const options = {

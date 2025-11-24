@@ -76,7 +76,7 @@ async function sendTestNotification(userId) {
         const message = {
           notification: {
             title: "🎉 Test Notification",
-            body: "This is a test notification from CODE 4O4! Everything is working perfectly.",
+            body: "This is a test notification from DevForge! Everything is working perfectly.",
           },
           data: {
             type: "test",
@@ -102,7 +102,7 @@ async function sendTestNotification(userId) {
     await db.collection("notifications").add({
       userId,
       title: "🎉 Test Notification",
-  body: "This is a test notification from CODE 4O4! Everything is working perfectly.",
+  body: "This is a test notification from DevForge! Everything is working perfectly.",
       type: "test",
       read: false,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),

@@ -100,7 +100,7 @@ const Hero = ({
         <p className="mt-5 max-w-2xl text-lg text-white/70">
           {isAuthenticated
             ? "You are logged in. Jump into the dashboard, scan live events, or continue collaborating with your squad."
-                 : "Join CODE 4O4 to collaborate on ambitious projects, unlock portal-powered workspaces, get curated mentorship, and climb our gamified leaderboard."}
+            : "Join DevForge to collaborate on ambitious projects, unlock portal-powered workspaces, get curated mentorship, and climb our gamified leaderboard."}
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-4">
@@ -241,7 +241,7 @@ const JourneySection = () => (
 
 const Footer = () => (
   <footer className="mt-16 flex flex-col gap-4 rounded-3xl border border-white/10 bg-black/40 p-6 text-sm text-white/60 sm:flex-row sm:items-center sm:justify-between">
-         <p>© {new Date().getFullYear()} CODE4O4</p>
+         <p>© {new Date().getFullYear()} DevForge</p>
     <div className="flex flex-wrap items-center gap-3">
     </div>
   </footer>

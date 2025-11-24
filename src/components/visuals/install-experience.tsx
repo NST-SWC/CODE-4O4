@@ -214,7 +214,7 @@ export const InstallExperience = ({ active, message }: InstallExperienceProps) =
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
       <div className="relative flex flex-col items-center gap-2 text-center">
         <p className="text-xs uppercase tracking-[0.4em] text-teal-200">Installing</p>
-        <p className="text-2xl font-semibold text-white">CODE 4O4 Portal</p>
+        <p className="text-2xl font-semibold text-white">DevForge Portal</p>
         <p className="text-sm text-white/70">{message ?? "Unlocking offline mode..."}</p>
       </div>
     </div>

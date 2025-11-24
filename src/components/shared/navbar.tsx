@@ -23,7 +23,7 @@ const baseNavItems = [
   { name: "Dashboard", path: "/dashboard", icon: Home, description: "Home base" },
   { name: "Projects", path: "/projects", icon: Folder, description: "Squad builds" },
   { name: "Events", path: "/events", icon: Calendar, description: "Live schedule" },
-  { name: "Sessions", path: "/sessions", icon: BookOpen, description: "Workshop flow" },
+  { name: "Calendar", path: "/sessions", icon: Calendar, description: "Club calendar" },
   { name: "Leaderboard", path: "/leaderboard", icon: Trophy, description: "Club stats" },
 ];
 
@@ -150,7 +150,7 @@ export default function Navbar({ showGuestCtas = false, onLogin, onJoin }: Navba
           href="/"
           className="flex-shrink-0 font-semibold tracking-[0.3em] text-xs hover:text-cyan-400 md:text-sm"
         >
-          CODE 4O4
+          DevForge
         </Link>
 
         <ul className="flex gap-6 xl:gap-8">
@@ -238,7 +238,7 @@ export default function Navbar({ showGuestCtas = false, onLogin, onJoin }: Navba
           <Menu className="h-5 w-5" />
         </button>
         <Link href="/" className="text-xs font-semibold tracking-[0.2em] text-white hover:text-cyan-400">
-          C404
+          DevForge
         </Link>
         <div className="flex items-center gap-2">
           {shouldShowBell && <NotificationBell buttonVariant="icon" />}
@@ -281,7 +281,7 @@ export default function Navbar({ showGuestCtas = false, onLogin, onJoin }: Navba
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.45em] text-white/60">Code 404</p>
+                  <p className="text-xs uppercase tracking-[0.45em] text-white/60">DevForge</p>
                   <p className="text-2xl font-semibold">
                     {isAuthenticated && user?.name ? `Welcome back, ${user.name.split(" ")[0]}` : "Welcome"}
                   </p>
@@ -367,7 +367,7 @@ export default function Navbar({ showGuestCtas = false, onLogin, onJoin }: Navba
                   </>
                 ) : (
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/70">
-                    <p>Join CODE 404 to unlock dashboard, projects, and weekly sessions.</p>
+                    <p>Join DevForge to unlock dashboard, projects, and weekly sessions.</p>
                     <div className="mt-4 flex gap-2">
                       <button
                         onClick={handleLoginClick}

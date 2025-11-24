@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     // Normalize/enrich payload so notifications are visually richer by default.
     // Admin can override any of these fields by supplying them in the request payload.
     const payload = {
-      title: raw.title || 'CODE 4O4',
+      title: raw.title || 'DevForge',
       body: raw.body || '',
       icon: raw.icon || '/app-icon-192.png',
       badge: raw.badge || '/app-icon-72.png',
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
       }
     }
     const notificationPayload = {
-      title: payload.title || 'CODE 4O4',
+      title: payload.title || 'DevForge',
       body: payload.body || '',
       icon: payload.icon || '/icon-192x192.png',
       url: payload.data?.url || payload.url || '/',

@@ -41,9 +41,9 @@ async function sendTestEmail() {
 
   try {
     const info = await transporter.sendMail({
-      from: `"CODE 4O4" <${process.env.SMTP_USER}>`,
+      from: `"DevForge" <${process.env.SMTP_USER}>`,
       to: 'goyalgeetansh@gmail.com',
-      subject: '🧪 Test Email - CODE 4O4',
+      subject: '🧪 Test Email - DevForge',
       html: `
         <!DOCTYPE html>
         <html>
@@ -62,7 +62,7 @@ async function sendTestEmail() {
           <div class="content">
             <h2>Hello Geetansh! 👋</h2>
             <p class="success">Your email system is working perfectly!</p>
-            <p>This is a test email from the CODE 4O4 credential system.</p>
+            <p>This is a test email from the DevForge credential system.</p>
             <p><strong>Configuration Details:</strong></p>
             <ul>
               <li>SMTP Server: ${process.env.SMTP_HOST}</li>
@@ -81,7 +81,7 @@ Hello Geetansh!
 
 Your email system is working perfectly!
 
-This is a test email from the CODE 4O4 credential system.
+This is a test email from the DevForge credential system.
 
 Configuration Details:
 - SMTP Server: ${process.env.SMTP_HOST}
