@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { getFirestoreDb } from "@/lib/firebase/client";
 import { collection, getDocs, addDoc, query, orderBy, Timestamp } from "firebase/firestore";
-import { Loader2, Upload, Download, Search, RefreshCw, Users, User, ShieldCheck } from "lucide-react";
+import { Loader2, Upload, Download, Search, RefreshCw, Users, User, ShieldCheck, XCircle } from "lucide-react";
 import { motion } from "framer-motion";
 
 const ADMIN_CODE = "devforge2025";
@@ -32,6 +32,7 @@ export default function AdminPage() {
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [importing, setImporting] = useState(false);
+    const [configError, setConfigError] = useState<string | null>(null);
 
     useEffect(() => {
         const cached = localStorage.getItem("devforge_admin_access");
@@ -53,11 +54,14 @@ export default function AdminPage() {
 
     const fetchData = async () => {
         setLoading(true);
+        setConfigError(null);
         try {
+            if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+                throw new Error("Missing Environment Variables (NEXT_PUBLIC_FIREBASE_API_KEY). Check your Vercel Project Settings.");
+            }
             const db = getFirestoreDb();
             if (!db) {
-                console.error("Firestore not initialized");
-                return;
+                throw new Error("Firestore not initialized. Possible config error.");
             }
             // Note: OrderBy might require an index, using simple fetch for now if it fails
             const q = query(collection(db, "hackathon_registrations"), orderBy("createdAt", "desc"));
@@ -86,7 +90,7 @@ export default function AdminPage() {
             setRegistrations(data);
         } catch (error) {
             console.error("Error fetching data:", error);
-            alert("Failed to fetch registrations");
+            setConfigError(error instanceof Error ? error.message : "Unknown error");
         } finally {
             setLoading(false);
         }
@@ -234,6 +238,16 @@ export default function AdminPage() {
                         </button>
                     </div>
                 </div>
+
+                {/* Error Banner */}
+                {configError && (
+                    <div className="p-4 bg-red-500/10 border border-red-500 rounded-xl text-red-200 flex items-center gap-3">
+                        <XCircle className="w-6 h-6 shrink-0" />
+                        <div>
+                            <strong>Connection Error:</strong> {configError}
+                        </div>
+                    </div>
+                )}
 
                 {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

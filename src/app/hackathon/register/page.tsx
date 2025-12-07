@@ -144,7 +144,7 @@ export default function RegisterPage() {
                         Thanks for registering for DevForge. We've sent a confirmation email to your inbox.
                     </p>
                     <Link
-                        href="/"
+                        href="https://hackathon.code4o4.xyz"
                         className="inline-block w-full py-3 bg-white text-black font-bold rounded-lg hover:bg-neutral-200 transition-colors"
                     >
                         Back to Home
@@ -163,7 +163,7 @@ export default function RegisterPage() {
                             <strong>System Error:</strong> {firebaseError}
                         </div>
                     )}
-                    <Link href="/" className="inline-flex items-center text-neutral-400 hover:text-white mb-8 transition-colors">
+                    <Link href="https://hackathon.code4o4.xyz" className="inline-flex items-center text-neutral-400 hover:text-white mb-8 transition-colors">
                         <ArrowLeft className="w-4 h-4 mr-2" /> Back
                     </Link>
 
