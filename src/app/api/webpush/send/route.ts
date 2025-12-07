@@ -79,7 +79,7 @@ export async function POST(req: Request) {
     const notificationPayload = {
       title: payload.title || 'DevForge',
       body: payload.body || '',
-      icon: payload.icon || '/icon-192x192.png',
+      icon: payload.icon || '/app-icon-192.png',
       url: payload.data?.url || payload.url || '/',
       tag: payload.tag || null,
       source: payload.tag || payload.type || 'webpush',

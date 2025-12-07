@@ -71,7 +71,7 @@ export async function POST(request: Request) {
                       link: `/projects`,
                     },
                     notification: {
-                      icon: "/icon-192x192.png",
+                      icon: "/android-chrome-192x192.png",
                     },
                   },
                 });
@@ -87,7 +87,7 @@ export async function POST(request: Request) {
             title: notificationTitle,
             body: notificationBody,
             url: `/projects`,
-            icon: "/icon-192x192.png",
+            icon: "/android-chrome-192x192.png",
             read: false,
             createdAt: serverTimestamp(),
           });
@@ -118,7 +118,7 @@ export async function POST(request: Request) {
                     link: `/projects`,
                   },
                   notification: {
-                    icon: "/icon-192x192.png",
+                    icon: "/android-chrome-192x192.png",
                   },
                 },
               });
@@ -134,7 +134,7 @@ export async function POST(request: Request) {
           title: confirmTitle,
           body: confirmBody,
           url: `/projects`,
-          icon: "/icon-192x192.png",
+          icon: "/android-chrome-192x192.png",
           read: false,
           createdAt: serverTimestamp(),
         });

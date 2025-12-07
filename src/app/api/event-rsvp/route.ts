@@ -54,14 +54,14 @@ export async function POST(request: Request) {
                 data: {
                   url: `/events`,
                   eventId,
-                  icon: "/icon-192x192.png",
+                  icon: "/android-chrome-192x192.png",
                 },
                 webpush: {
                   fcmOptions: {
                     link: `/events`,
                   },
                   notification: {
-                    icon: "/icon-192x192.png",
+                    icon: "/android-chrome-192x192.png",
                   },
                 },
               });
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
           title: notificationTitle,
           body: notificationBody,
           url: `/events`,
-          icon: "/icon-192x192.png",
+          icon: "/android-chrome-192x192.png",
           read: false,
           createdAt: serverTimestamp(),
         });

@@ -147,7 +147,7 @@ export default function NotificationBell({
           title: incoming.title || "Notification",
           body: incoming.body || "",
           url: incoming.url || "/",
-          icon: incoming.icon || "/icon-192x192.png",
+          icon: incoming.icon || "/android-chrome-192x192.png",
           createdAt: incoming.createdAt || new Date().toISOString(),
           read: false,
         };

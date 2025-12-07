@@ -15,7 +15,7 @@ const serializeNotification = (doc: QueryDocumentSnapshot) => {
     title: data.title,
     body: data.body,
     url: data.url || "/",
-    icon: data.icon || "/icon-192x192.png",
+    icon: data.icon || "/android-chrome-192x192.png",
     read: Boolean(data.read),
     createdAt: createdAt ? new Date(createdAt).toISOString() : null,
     readAt: readAt ? new Date(readAt).toISOString() : null,

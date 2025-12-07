@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
                         link: `/dashboard`,
                       },
                       notification: {
-                        icon: "/icon-192x192.png",
+                        icon: "/android-chrome-192x192.png",
                       },
                     },
                   });
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
               title: notificationTitle,
               body: notificationBody,
               url: `/dashboard`,
-              icon: "/icon-192x192.png",
+              icon: "/android-chrome-192x192.png",
               read: false,
               createdAt: serverTimestamp(),
             });

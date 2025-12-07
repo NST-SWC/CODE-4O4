@@ -11,13 +11,8 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://devforge.preview"),
   manifest: "/manifest.json",
   icons: {
-    icon: [
-      { url: "/app-icon-192.png", type: "image/png", sizes: "192x192" },
-      { url: "/app-icon-512.png", type: "image/png", sizes: "512x512" },
-    ],
-    apple: [
-      { url: "/apple-touch-icon-180.png", sizes: "180x180", type: "image/png" },
-    ],
+    icon: "/icon.png",
+    apple: "/icon.png",
   },
   appleWebApp: {
     capable: true,
@@ -33,14 +28,14 @@ export const metadata: Metadata = {
     title: "DevForge · Build, Learn, Grow",
     description:
       "Build, Learn, and Grow with DevForge",
-    images: [{ url: "/app-icon-512.png", width: 512, height: 512 }],
+    images: [{ url: "/icon.png", width: 512, height: 512 }],
   },
   twitter: {
     card: "summary",
     title: "DevForge",
     description:
       "Build, Learn, and Grow with DevForge",
-    images: ["/app-icon-512.png"],
+    images: ["/icon.png"],
   },
 };
 
@@ -69,13 +64,8 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="DevForge" />
         {/* Make manifest & icons explicit to help installability checks */}
         <link rel="manifest" href="/manifest.json" />
-        <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png" />
-        <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png" />
-        {/* apple-touch-icon should point to the PNG you added for best iOS support */}
-  <link rel="apple-touch-icon" href="/apple-touch-icon-180.png" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="/app-icon-192.png" />
+        <link rel="icon" type="image/png" href="/icon.png" />
+        <link rel="apple-touch-icon" href="/icon.png" />
         <meta name="theme-color" content="#06b6d4" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
