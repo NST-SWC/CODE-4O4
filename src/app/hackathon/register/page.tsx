@@ -6,7 +6,7 @@ import * as z from "zod";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft, Check, Loader2, Plus, Trash2, Users, User } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getFirestoreDb } from "@/lib/firebase/client";
 import { collection, addDoc } from "firebase/firestore";
 
@@ -64,14 +64,14 @@ export default function RegisterPage() {
 
     // Check Firebase connection on mount
     const [firebaseError, setFirebaseError] = useState<string | null>(null);
-    useState(() => {
+    useEffect(() => {
         // Simple check: do we have config?
         // Note: We can't import hasFirebaseConfig easily because it's in a non-component file, 
         // but we can check the env var availability which drives it.
         if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
             setFirebaseError("Missing Firebase Environment Variables (NEXT_PUBLIC_FIREBASE_API_KEY)");
         }
-    });
+    }, []);
 
     // Watch type to adjust validation or UI if needed
     // const type = watch("type");

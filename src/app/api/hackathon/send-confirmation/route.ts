@@ -1,10 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendHackathonRegistrationEmail } from "@/lib/email";
+import validator from "validator";
+
+// Simple in-memory rate limiting (IP-based)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 3; // Max 3 requests
+const RATE_WINDOW = 60 * 60 * 1000; // 1 hour in milliseconds
+
+function checkRateLimit(ip: string): boolean {
+    const now = Date.now();
+    const record = rateLimitMap.get(ip);
+
+    if (!record || now > record.resetTime) {
+        rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_WINDOW });
+        return true;
+    }
+
+    if (record.count >= RATE_LIMIT) {
+        return false;
+    }
+
+    record.count++;
+    return true;
+}
 
 export async function POST(request: NextRequest) {
     try {
+        // Rate limiting check
+        const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+        if (!checkRateLimit(ip)) {
+            console.warn(`⚠️ [API] Rate limit exceeded for IP: ${ip}`);
+            return NextResponse.json(
+                { success: false, error: "Too many requests. Please try again later." },
+                { status: 429 }
+            );
+        }
+
         const body = await request.json();
-        const { email, name, type, teamName, memberCount } = body;
+        let { email, name, type, teamName, memberCount } = body;
 
         // Validate required fields
         if (!email || !name || !type || !memberCount) {
@@ -12,6 +45,21 @@ export async function POST(request: NextRequest) {
                 { success: false, error: "Missing required fields" },
                 { status: 400 }
             );
+        }
+
+        // Sanitize and validate email
+        email = validator.normalizeEmail(email) || email;
+        if (!validator.isEmail(email)) {
+            return NextResponse.json(
+                { success: false, error: "Invalid email address" },
+                { status: 400 }
+            );
+        }
+
+        // Sanitize text inputs to prevent XSS
+        name = validator.escape(name);
+        if (teamName) {
+            teamName = validator.escape(teamName);
         }
 
         // Validate type

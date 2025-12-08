@@ -29,12 +29,6 @@ export async function sendCredentialsEmail({
 }) {
   try {
     console.log(`📧 [Email Service] Starting email send process...`);
-    console.log(`   Environment check:`, {
-      hasHost: !!process.env.SMTP_HOST,
-      hasPort: !!process.env.SMTP_PORT,
-      hasUser: !!process.env.SMTP_USER,
-      hasPass: !!process.env.SMTP_PASS,
-    });
 
     if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
       const error = "SMTP credentials not configured. Check environment variables.";
@@ -259,22 +253,16 @@ export async function sendHackathonRegistrationEmail({
   memberCount: number;
 }) {
   try {
-    console.log(`📧 [Email Service] Sending hackathon registration confirmation...`);
-    console.log(`   Environment check:`, {
-      hasHost: !!process.env.SMTP_HOST,
-      hasPort: !!process.env.SMTP_PORT,
-      hasUser: !!process.env.SMTP_USER,
-      hasPass: !!process.env.SMTP_PASS,
-    });
+    console.log("📧 [Email Service] Sending hackathon registration confirmation...");
 
     if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      const error = "SMTP credentials not configured. Check environment variables.";
+      const error = "SMTP credentials not configured";
       console.error(`❌ [Email Service] ${error}`);
       return { success: false, error };
     }
 
     const transporter = createTransporter();
-    console.log(`✅ [Email Service] Transporter created`);
+    console.log("✅ [Email Service] Transporter created");
 
     const registrationDetails = type === "team"
       ? `<strong>Team Name:</strong> ${teamName}<br><strong>Team Size:</strong> ${memberCount} members`

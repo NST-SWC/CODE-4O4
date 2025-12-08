@@ -6,7 +6,7 @@ import { collection, getDocs, addDoc, query, orderBy, Timestamp } from "firebase
 import { Loader2, Upload, Download, Search, RefreshCw, Users, User, ShieldCheck, XCircle } from "lucide-react";
 import { motion } from "framer-motion";
 
-const ADMIN_CODE = "12345678@";
+// Removed hardcoded password - now using secure API authentication
 
 type Member = {
     name: string;
@@ -42,13 +42,26 @@ export default function AdminPage() {
         }
     }, []);
 
-    const verifyAccess = () => {
-        if (accessInput === ADMIN_CODE) {
-            setAccessGranted(true);
-            localStorage.setItem("devforge_admin_access", "true");
-            fetchData();
-        } else {
-            alert("Invalid Access Code");
+    const verifyAccess = async () => {
+        try {
+            const response = await fetch("/api/admin/auth", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password: accessInput }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                setAccessGranted(true);
+                localStorage.setItem("devforge_admin_access", "true");
+                fetchData();
+            } else {
+                alert("Invalid Access Code");
+            }
+        } catch (error) {
+            console.error("Auth error:", error);
+            alert("Authentication failed. Please try again.");
         }
     };
 
