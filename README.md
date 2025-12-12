@@ -1,89 +1,204 @@
-## NSTSWC Dev Club Portal
+# NSTSWC Dev Club Portal
 
-A smooth, neon-inspired developer club experience built with Next.js 16, Tailwind CSS v4, Framer Motion, and Firebase. The marketing homepage mirrors the provided reference while the authenticated dashboard showcases projects, events, sessions, leaderboards, and admin approvals backed by Firebase helpers.
+A secure, neon-inspired developer club portal built with Next.js 16, Tailwind CSS v4, Framer Motion, and Firebase.
 
-### ✨ Highlights
-- Animated hero, feature grid, and journey timeline styled with glassmorphism + glow particles.
-- CTA buttons trigger fully validated modals for **Join Club** (rich application form) and **username/password login** (no Firebase Auth dependency). Successful logins now redirect to the dashboard automatically.
-- Projects, events, calendar previews, leaderboard teaser, and admin queue now live on their own dedicated routes _and_ have callouts on the homepage.
-- `/dashboard` route recreates the internal portal with stats, project request flows, event RSVPs, sprint calendar, leaderboard, and approval widgets.
-- **🔔 Push Notifications** - Real-time notifications for events, project updates, and admin decisions via Firebase Cloud Messaging with PWA support
-- Firebase helpers for join requests, project interest, and event RSVPs now POST through secure Next.js API routes that write to Firestore with the provided service account. (If you remove the sample credentials, set `FIREBASE_SERVICE_ACCOUNT` with your own JSON.)
+## ⚠️ IMPORTANT: Security Setup Required
 
-### 🧰 Stack
-- [Next.js 16 App Router](https://nextjs.org/) with TypeScript & `src/` directory.
-- Tailwind CSS v4 (utility-first styling) + custom CSS variables for neon theme.
-- [Framer Motion](https://www.framer.com/motion/) for modals and section animations.
-- [Firebase Web SDK](https://firebase.google.com/docs/web) (Auth + Firestore helpers).
-- `react-hook-form` + `zod` for robust form validation.
+**Before deploying to production, you MUST complete these security steps:**
 
-### 🚀 Getting Started
+### 1. Generate and Add JWT_SECRET
+
 ```bash
-npm install
-npm run dev
-# visit http://localhost:3000
+# Generate a secure secret
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+
+# Add to Vercel Environment Variables:
+# Name: JWT_SECRET
+# Value: [paste generated secret]
+# Environment: Production, Preview, Development
 ```
-The dashboard lives at `http://localhost:3000/dashboard`.
 
-### 🔑 Demo Accounts
-Static credentials are baked into the client-side auth context for previews:
+### 2. Set ADMIN_PASSWORD
 
-| Username | Password   | Role   |
-|----------|------------|--------|
-| `admin`  | `admin123` | Admin  |
-| `mentor` | `mentor123`| Mentor |
-| `member` | `member123`| Student |
+```bash
+# Add to Vercel Environment Variables:
+# Name: ADMIN_PASSWORD
+# Value: [your secure admin password]
+```
 
-Replace these with your own authentication mechanism (or connect to Firebase Auth) when deploying.
+### 3. Password Migration for Existing Users
 
-### 🔐 Firebase Setup
-1. Create a Firebase project (or reuse an existing one).
-2. Enable Google Auth and Firestore Database.
-3. Copy the web app credentials and populate `.env.local` using the provided template:
-   ```
-   cp .env.local.example .env.local
-   ```
-4. (Optional) Instead of env vars you can drop a service account JSON at the project root (one is provided for local demo). The API routes under `src/app/api/*` all use `firebase-admin` so requests persist even without client-side Firebase config.
-5. **Enable Cloud Messaging** for push notifications:
-   - Go to Firebase Console > Project Settings > Cloud Messaging
-   - Generate VAPID key and add to `.env.local` as `NEXT_PUBLIC_FIREBASE_VAPID_KEY`
-   - See [NOTIFICATION_SYSTEM.md](./NOTIFICATION_SYSTEM.md) for complete setup guide
+**CRITICAL**: Existing users with plaintext passwords cannot log in until migrated.
 
-### 🔔 Slack Bot (Dev Club channel)
-- Follow [SLACK_SETUP.md](./SLACK_SETUP.md) to configure either a webhook (`SLACK_WEBHOOK_URL`) or bot token (`SLACK_BOT_TOKEN` + channel ID) in `.env.local`.
-- Post messages via `POST /api/slack/notify` (guarded by `x-slack-secret`) or from the CLI with `npm run slack:send -- \"Hello\" --url https://devclub.example.com --ping here`. Multi-channel fan-out is supported via the `channels` array or `--channels` flag. The system prefers the webhook when set, falling back to the bot token.
-- If Slack shows “app not configured to handle interactive responses,” enable Interactivity in Slack and point the Request URL to `/api/slack/interactive` (see SLACK_SETUP.md).
+**Option A - Force Password Reset** (Recommended):
+- Send email to all users requesting password reset
+- New passwords will be automatically hashed
 
-Without valid credentials, all Firebase-powered actions remain in **preview mode** (requests resolve locally so you can demo the flow without writes).
+**Option B - One-Time Migration**:
+- Run migration script to hash existing passwords
+- See deployment documentation for details
 
-### 📁 Notable Structure
+## 🔐 Security Features
+
+- ✅ **bcrypt Password Hashing** - All passwords hashed with 12 salt rounds
+- ✅ **JWT Authentication** - Secure token-based auth with expiration
+- ✅ **Rate Limiting** - Protection against brute force attacks (5 attempts/15min)
+- ✅ **Security Headers** - HSTS, CSP, X-Frame-Options, and more
+- ✅ **Input Validation** - XSS prevention and sanitization
+- ✅ **No Credential Logging** - Passwords never appear in logs
+
+## 🚀 Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local and add all required variables
+
+# Run development server
+npm run dev
+# Visit http://localhost:3000
+```
+
+## 📋 Required Environment Variables
+
+### Security (REQUIRED)
+```bash
+JWT_SECRET=<generate with: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))">
+ADMIN_PASSWORD=<your-secure-admin-password>
+```
+
+### Firebase (REQUIRED)
+```bash
+NEXT_PUBLIC_FIREBASE_API_KEY=<your-api-key>
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=<your-project>.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=<your-project-id>
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=<your-project>.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=<your-sender-id>
+NEXT_PUBLIC_FIREBASE_APP_ID=<your-app-id>
+FIREBASE_SERVICE_ACCOUNT=<your-service-account-json>
+```
+
+### Email (REQUIRED for notifications)
+```bash
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=<your-email@gmail.com>
+SMTP_PASS=<your-app-password>
+SMTP_FROM=<your-email@gmail.com>
+```
+
+### Optional
+```bash
+SLACK_WEBHOOK_URL=<your-slack-webhook>
+WEBPUSH_SEND_SECRET=<your-webpush-secret>
+```
+
+## 🧰 Tech Stack
+
+- **Framework**: Next.js 16 with App Router & TypeScript
+- **Styling**: Tailwind CSS v4
+- **Animation**: Framer Motion
+- **Database**: Firebase Firestore
+- **Authentication**: JWT + bcrypt
+- **Email**: Nodemailer
+- **Security**: Rate limiting, security headers, input validation
+
+## 📁 Project Structure
+
 ```
 src/
   app/
-    page.tsx             # Marketing experience (renders HomeLanding)
-    dashboard/page.tsx   # Authenticated portal preview
-    projects/page.tsx    # Full projects listing
-    events/page.tsx      # Events-only feed
-    calendar/page.tsx    # Sessions timeline
-    leaderboard/page.tsx # Rankings overview
-    admin/page.tsx       # Pending approvals
-  components/
-    home/                # Landing page sections + layout helpers
-    forms/               # Join club form (react-hook-form + zod)
-    modals/              # Join/Login modals with Framer Motion
-    ui/                  # Reusable UI primitives (buttons, etc.)
-    shared/              # Page container + intro utilities for simple routes
-  context/
-    auth-context.tsx     # Local username/password session state
+    api/              # Secure API routes
+    dashboard/        # Authenticated portal
+    hackathon/        # Hackathon registration
+    projects/         # Projects listing
+    events/           # Events feed
+  components/         # Reusable UI components
   lib/
-    data.ts              # Static preview data for cards/sections
-    firebase/            # App init + Firestore helper actions
-    utils.ts             # Formatting helpers
-  types/                 # Shared TypeScript contracts
+    auth-utils.ts     # Password hashing & JWT
+    rate-limit.ts     # Rate limiting middleware
+    firebase/         # Firebase helpers
 ```
 
-### ✅ Next Steps
-1. Replace preview data with live Firestore listeners (projects/events/leaderboard).
-2. Swap the static credential map with your preferred auth provider (Firebase Auth, Supabase, etc.).
-3. Gate `/dashboard` and the new `/admin` route with server-side checks when deploying publicly.
-4. Hook the leaderboard to a points engine stored in Firestore or RTDB.
+## 🔒 Security Best Practices
+
+1. **Never commit `.env` files** - Already in `.gitignore`
+2. **Rotate secrets regularly** - Every 90 days recommended
+3. **Use strong passwords** - Minimum 12 characters
+4. **Monitor logs** - Check for suspicious activity
+5. **Keep dependencies updated** - Run `npm audit` regularly
+
+## 🚢 Deployment Checklist
+
+- [ ] Add `JWT_SECRET` to Vercel environment variables
+- [ ] Add `ADMIN_PASSWORD` to Vercel environment variables
+- [ ] Add all Firebase credentials to Vercel
+- [ ] Add SMTP credentials for email
+- [ ] Plan password migration strategy
+- [ ] Test authentication after deployment
+- [ ] Verify security headers are active
+- [ ] Monitor logs for errors
+
+## 🔧 Development
+
+```bash
+# Development
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Run security audit
+npm audit
+
+# Fix vulnerabilities
+npm audit fix
+```
+
+## 📚 Additional Documentation
+
+- Security implementation details in commit history
+- Firebase setup in Firebase Console
+- Vercel deployment in Vercel Dashboard
+
+## ⚡ Features
+
+- **Secure Authentication** - JWT tokens with bcrypt password hashing
+- **Rate Limiting** - Protection against brute force attacks
+- **Push Notifications** - Real-time updates via Firebase Cloud Messaging
+- **Admin Dashboard** - Manage members, projects, and events
+- **Hackathon Portal** - Dedicated registration and management
+- **Leaderboard** - Track member points and achievements
+- **Project Management** - Create and join collaborative projects
+- **Event Calendar** - Schedule and RSVP to events
+
+## 🆘 Troubleshooting
+
+### "JWT_SECRET not set" error
+- Ensure `JWT_SECRET` is added to Vercel environment variables
+- Redeploy after adding the variable
+
+### Login fails after deployment
+- Check that password migration is complete
+- Verify `ADMIN_PASSWORD` is set correctly
+- Check Vercel function logs for errors
+
+### Build errors
+- Clear `.next` directory: `rm -rf .next`
+- Reinstall dependencies: `rm -rf node_modules && npm install`
+- Run `npm audit fix` to fix vulnerabilities
+
+## 📄 License
+
+MIT
+
+## 🤝 Contributing
+
+Contributions welcome! Please ensure all security best practices are followed.
+
