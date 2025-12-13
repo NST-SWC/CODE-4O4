@@ -44,7 +44,7 @@ export const HomeLanding = () => {
 
   return (
     <>
-      <Navbar showGuestCtas onLogin={handleLogin} onJoin={() => setJoinOpen(true)} />
+      <Navbar showGuestCtas onLoginAction={handleLogin} onJoinAction={() => setJoinOpen(true)} />
       <div className="relative overflow-hidden pb-24 pt-6">
         <BackgroundGlow />
         <div className="mx-auto max-w-6xl px-4 pt-6 sm:px-6 lg:px-8">
@@ -81,65 +81,65 @@ const Hero = ({
   isAuthenticated: boolean;
 }) => {
   return (
-  <section id="join" className="mt-6 grid gap-12 lg:grid-cols-[1.1fr_0.9fr]">
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8 }}
-      className="space-y-8"
-    >
-      <span className="inline-flex items-center gap-2 rounded-full border border-orange-500/30 px-4 py-1 text-xs uppercase tracking-[0.3em] text-orange-300">
-        ⚡ Future of Dev Learning
-      </span>
-      <div>
-        <h1 className="text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-          {isAuthenticated
-            ? `Welcome back, ${user?.name.split(" ")[0] ?? "Member"}`
-            : "Build, Learn, Grow Together as Developers"}
-        </h1>
-        <p className="mt-5 max-w-2xl text-lg text-white/70">
-          {isAuthenticated
-            ? "You are logged in. Jump into the dashboard, scan live events, or continue collaborating with your squad."
-            : "Join DevForge to collaborate on ambitious projects, unlock portal-powered workspaces, get curated mentorship, and climb our gamified leaderboard."}
-        </p>
-      </div>
-      <div className="flex flex-wrap items-center gap-4">
-        {isAuthenticated ? (
-          <>
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#00f5c4] to-[#00c2ff] px-5 py-2 text-base font-semibold text-black shadow-[0_0_35px_rgba(0,245,196,0.4)] transition hover:scale-[1.01]"
-            >
-              Open Dashboard <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/projects"
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-2 text-base text-white/80 transition hover:border-orange-400 hover:text-white"
-            >
-              View Projects
-            </Link>
-          </>
-        ) : (
-          <>
-            <Button onClick={onJoin} glow className="text-base">
-              Get Started <ArrowRight className="h-4 w-4" />
-            </Button>
-            <Button onClick={onLogin} variant="secondary" className="text-base">
-              Explore Portal
-            </Button>
-          </>
-        )}
-        <Link
-          href="/projects"
-          className="flex items-center gap-2 text-sm text-white/60 transition hover:text-white"
-        >
-          <Sparkles className="h-4 w-4 text-orange-400" />
-          Explore live builds
-        </Link>
-      </div>
-    </motion.div>
-  </section>
-);
+    <section id="join" className="mt-6 grid gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="space-y-8"
+      >
+        <span className="inline-flex items-center gap-2 rounded-full border border-orange-500/30 px-4 py-1 text-xs uppercase tracking-[0.3em] text-orange-300">
+          ⚡ Future of Dev Learning
+        </span>
+        <div>
+          <h1 className="text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+            {isAuthenticated
+              ? `Welcome back, ${user?.name.split(" ")[0] ?? "Member"}`
+              : "Build, Learn, Grow Together as Developers"}
+          </h1>
+          <p className="mt-5 max-w-2xl text-lg text-white/70">
+            {isAuthenticated
+              ? "You are logged in. Jump into the dashboard, scan live events, or continue collaborating with your squad."
+              : "Join DevForge to collaborate on ambitious projects, unlock portal-powered workspaces, get curated mentorship, and climb our gamified leaderboard."}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-4">
+          {isAuthenticated ? (
+            <>
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#00f5c4] to-[#00c2ff] px-5 py-2 text-base font-semibold text-black shadow-[0_0_35px_rgba(0,245,196,0.4)] transition hover:scale-[1.01]"
+              >
+                Open Dashboard <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/projects"
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-2 text-base text-white/80 transition hover:border-orange-400 hover:text-white"
+              >
+                View Projects
+              </Link>
+            </>
+          ) : (
+            <>
+              <Button onClick={onJoin} glow className="text-base">
+                Get Started <ArrowRight className="h-4 w-4" />
+              </Button>
+              <Button onClick={onLogin} variant="secondary" className="text-base">
+                Explore Portal
+              </Button>
+            </>
+          )}
+          <Link
+            href="/projects"
+            className="flex items-center gap-2 text-sm text-white/60 transition hover:text-white"
+          >
+            <Sparkles className="h-4 w-4 text-orange-400" />
+            Explore live builds
+          </Link>
+        </div>
+      </motion.div>
+    </section>
+  );
 };
 
 const StatsRow = () => (
@@ -241,7 +241,7 @@ const JourneySection = () => (
 
 const Footer = () => (
   <footer className="mt-16 flex flex-col gap-4 rounded-3xl border border-white/10 bg-black/40 p-6 text-sm text-white/60 sm:flex-row sm:items-center sm:justify-between">
-         <p>© {new Date().getFullYear()} DevForge</p>
+    <p>© {new Date().getFullYear()} DevForge</p>
     <div className="flex flex-wrap items-center gap-3">
     </div>
   </footer>
