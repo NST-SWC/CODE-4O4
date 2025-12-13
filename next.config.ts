@@ -53,22 +53,13 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self' https://*.vercel.app;script-src 'self' https://*.vercel.app https://*.firebaseio.com https://*.firebaseapp.com https://*.googleapis.com https://www.gstatic.com;style-src 'self' https://*.vercel.app https://fonts.googleapis.com 'unsafe-inline';font-src 'self' https://*.vercel.app https://fonts.gstatic.com data:;connect-src 'self' https://*.vercel.app https://*.firebaseio.com https://*.firebaseapp.com https://*.googleapis.com https://www.gstatic.com wss://*.firebaseio.com;img-src 'self' https://*.vercel.app https://*.gstatic.com https://*.firebaseapp.com data: blob:;frame-src 'self' https://*.vercel.app https://*.firebaseapp.com;"
+            value: "default-src 'self' https://*.vercel.app;script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.vercel.app https://*.firebaseio.com https://*.firebaseapp.com https://*.googleapis.com https://www.gstatic.com;style-src 'self' 'unsafe-inline' https://*.vercel.app https://fonts.googleapis.com;font-src 'self' https://*.vercel.app https://fonts.gstatic.com data:;connect-src 'self' https://*.vercel.app https://*.firebaseio.com https://*.firebaseapp.com https://*.googleapis.com https://www.gstatic.com wss://*.firebaseio.com;img-src 'self' https://*.vercel.app https://*.gstatic.com https://*.firebaseapp.com data: blob:;frame-src 'self' https://*.vercel.app https://*.firebaseapp.com;"
           }
         ],
       },
     ];
   },
-  // Redirect legacy hackathon admin path to current admin
-  async redirects() {
-    return [
-      {
-        source: '/hackathon/admin',
-        destination: '/hackathon/admin',
-        permanent: false,
-      },
-    ];
-  },
+
 };
 
 export default nextConfig;
