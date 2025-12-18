@@ -178,19 +178,21 @@ export default function AdminPage() {
     const exportCSV = () => {
         // Flatten data
         const headers = ["ID", "Type", "Team Name", "Member Name", "Email", "Phone", "Gender", "GitHub", "Portfolio", "Registered At"];
-        const rows = registrations.flatMap(reg =>
-            reg.members.map(m => [
+        const rows = registrations.flatMap(reg => {
+            const members = Array.isArray(reg.members) ? reg.members : [];
+            return members.map(m => [
                 reg.id,
                 reg.type,
                 reg.teamName || "N/A",
-                `"${m.name}"`,
-                m.email,
-                m.phone,
-                m.gender,
+                `"${m.name || ''}"`,
+                m.email || '',
+                m.phone || '',
+                m.gender || '',
                 m.github || "",
                 m.portfolio || "",
                 reg.createdAt ? new Date(reg.createdAt.seconds * 1000).toLocaleString() : "N/A"
-            ].join(","))
+            ].join(","));
+        }
         );
 
         const csvContent = [headers.join(","), ...rows].join("\n");
@@ -206,7 +208,7 @@ export default function AdminPage() {
 
     // Stats
     const totalRegistrations = registrations.length;
-    const totalParticipants = registrations.reduce((acc, curr) => acc + curr.members.length, 0);
+    const totalParticipants = registrations.reduce((acc, curr) => acc + (Array.isArray(curr.members) ? curr.members.length : 0), 0);
     const teamsCount = registrations.filter(r => r.type === "team").length;
 
     // Show loading while checking authentication
@@ -398,7 +400,8 @@ export default function AdminPage() {
                                     .filter(r => {
                                         const search = searchTerm.toLowerCase();
                                         const teamMatch = r.teamName?.toLowerCase().includes(search);
-                                        const memberMatch = r.members.some(m => m.name.toLowerCase().includes(search) || m.email.toLowerCase().includes(search));
+                                        const members = Array.isArray(r.members) ? r.members : [];
+                                        const memberMatch = members.some(m => m.name?.toLowerCase().includes(search) || m.email?.toLowerCase().includes(search));
                                         return teamMatch || memberMatch;
                                     })
                                     .map((reg) => (
@@ -411,23 +414,25 @@ export default function AdminPage() {
                                             <td className="p-4">
                                                 {reg.type === 'team' ? (
                                                     <span className="font-semibold text-white">{reg.teamName}</span>
-                                                ) : (
+                                                ) : Array.isArray(reg.members) && reg.members.length > 0 ? (
                                                     <span className="text-white">{reg.members[0]?.name}</span>
+                                                ) : (
+                                                    <span className="text-neutral-500">Unknown</span>
                                                 )}
                                             </td>
                                             <td className="p-4">
                                                 <div className="flex flex-col gap-1">
-                                                    {reg.members.map((m, i) => (
+                                                    {(Array.isArray(reg.members) ? reg.members : []).map((m, i) => (
                                                         <div key={i} className="text-sm text-neutral-300 flex items-center gap-2">
                                                             <User size={12} className="text-neutral-500" />
-                                                            {m.name}
+                                                            {m.name || 'Unknown'}
                                                         </div>
                                                     ))}
                                                 </div>
                                             </td>
                                             <td className="p-4 font-mono text-sm text-neutral-400">
-                                                {reg.members[0]?.email}
-                                                <div className="text-xs opacity-60">{reg.members[0]?.phone}</div>
+                                                {Array.isArray(reg.members) && reg.members[0]?.email || 'N/A'}
+                                                <div className="text-xs opacity-60">{Array.isArray(reg.members) && reg.members[0]?.phone || ''}</div>
                                             </td>
                                             <td className="p-4 text-sm text-neutral-500">
                                                 {reg.createdAt?.seconds ? new Date(reg.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}

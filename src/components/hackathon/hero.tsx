@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Code2, Terminal, Cpu } from "lucide-react";
+import Image from "next/image";
+import { Code2, Terminal } from "lucide-react";
 
 export function Hero() {
     return (
@@ -35,17 +36,21 @@ export function Hero() {
                     className="flex flex-wrap items-center justify-center gap-4 md:gap-8 mb-8"
                 >
                     <div className="h-16 w-32 md:h-20 md:w-40 bg-white rounded-lg p-2 flex items-center justify-center">
-                        <img
+                        <Image
                             src="/nst-logo.png"
                             alt="Newton School of Technology"
+                            width={160}
+                            height={80}
                             className="max-h-full max-w-full object-contain"
                         />
                     </div>
                     <span className="text-neutral-500 font-medium uppercase tracking-widest text-xs md:text-sm">Presents</span>
                     <div className="h-16 w-32 md:h-20 md:w-40 bg-white rounded-lg p-2 flex items-center justify-center">
-                        <img
+                        <Image
                             src="/svyasa-logo.png"
                             alt="S-VYASA"
+                            width={160}
+                            height={80}
                             className="max-h-full max-w-full object-contain"
                         />
                     </div>
@@ -60,11 +65,10 @@ export function Hero() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: 0.2 }}
                 >
-                    <div className="mt-6 max-w-2xl mx-auto px-6 py-4 bg-gradient-to-r from-orange-500/10 via-red-500/10 to-orange-500/10 border border-orange-500/30 rounded-xl backdrop-blur-sm">
-                        <p className="text-orange-300 font-semibold">
-                            ⚡ Only <span className="text-orange-400 font-bold text-lg">20 SLOTS</span> available •
-                            <span className="text-white"> Registrations are selection-based</span> •
-                            <span className="text-orange-400 font-bold"> Register ASAP!</span>
+                    <div className="mt-6 max-w-2xl mx-auto px-6 py-4 bg-gradient-to-r from-red-500/10 via-red-500/20 to-red-500/10 border border-red-500/30 rounded-xl backdrop-blur-sm">
+                        <p className="text-red-300 font-semibold">
+                            🚫 <span className="text-red-400 font-bold text-lg">REGISTRATIONS CLOSED</span> •
+                            <span className="text-white"> Thank you for your interest!</span>
                         </p>
                     </div>
                 </motion.div>
@@ -96,13 +100,11 @@ export function Hero() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.5 }}
                 >
-                    <Link
-                        href="/register"
-                        className="group relative px-8 py-4 bg-orange-500 hover:bg-orange-400 text-black font-bold text-lg rounded-xl transition-all hover:shadow-[0_0_40px_-10px_rgba(249,115,22,0.5)]"
+                    <div
+                        className="group relative px-8 py-4 bg-neutral-700 text-neutral-400 font-bold text-lg rounded-xl cursor-not-allowed"
                     >
-                        Register Now
-                        <ArrowRight className="inline-block ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
-                    </Link>
+                        Registrations Closed
+                    </div>
                     <Link
                         href="#schedule"
                         className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white font-medium text-lg rounded-xl border border-white/10 transition-colors backdrop-blur-sm"
