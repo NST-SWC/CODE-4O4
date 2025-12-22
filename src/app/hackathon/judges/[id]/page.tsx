@@ -78,16 +78,16 @@ export default async function JudgeVerificationPage({ params }: { params: Promis
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 py-12 px-4 print:bg-white">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-t-4 border-orange-500 print:shadow-none print:border">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-t-4 border-blue-900 print:shadow-none print:border">
           {/* Official Banner */}
-          <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-6">
+          <div className="bg-gradient-to-r from-blue-900 to-blue-700 text-white px-8 py-6">
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold mb-2">Official Judge Verification</h1>
-                <p className="text-orange-100 text-sm">{judge.organization}</p>
+                <p className="text-blue-100 text-sm">{judge.organization}</p>
               </div>
               <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-center">
-                <div className="text-xs text-orange-100 mb-1">Verification ID</div>
+                <div className="text-xs text-blue-100 mb-1">Verification ID</div>
                 <div className="font-mono font-bold text-sm">{id}</div>
               </div>
             </div>
@@ -101,7 +101,7 @@ export default async function JudgeVerificationPage({ params }: { params: Promis
                 <CheckCircle2 className="text-green-600" size={32} />
                 <div>
                   <div className="text-green-900 font-bold text-lg">Officially Verified</div>
-                  <div className="text-green-700 text-sm">This document is authentic</div>
+                  <div className="text-green-700 text-sm">Official Verification Statement</div>
                 </div>
               </div>
             </div>
@@ -203,8 +203,8 @@ export default async function JudgeVerificationPage({ params }: { params: Promis
               <div className="border-t border-neutral-200 pt-6 mt-6">
                 <div className="bg-blue-50 border-l-4 border-blue-500 rounded-r-lg p-4">
                   <p className="text-sm text-blue-900">
-                    <strong>Verification Note:</strong> This page serves as official confirmation that {judge.name} 
-                    served as a judge for {judge.event} {judge.year}. This verification is issued by {judge.organization} 
+                    <strong>Verification Note:</strong> This page serves as official confirmation that {judge.name}{' '}
+                    served as a judge for {judge.event} {judge.year}. This verification is issued by {judge.organization}{' '} 
                     and can be authenticated at any time using the unique verification ID: <code className="bg-blue-100 px-2 py-1 rounded font-mono text-xs">{id}</code>
                   </p>
                 </div>
@@ -212,7 +212,7 @@ export default async function JudgeVerificationPage({ params }: { params: Promis
 
               {/* Issued Date */}
               <div className="text-center text-sm text-neutral-500 pt-4">
-                <p>Verified on: {judge.verifiedDate}</p>
+                <p>Date of Issuance: {judge.verifiedDate}</p>
                 <p className="mt-2">© {judge.year} {judge.organization}. All rights reserved.</p>
               </div>
             </div>
